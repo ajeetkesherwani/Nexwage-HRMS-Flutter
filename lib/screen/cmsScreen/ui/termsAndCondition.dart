@@ -1,0 +1,84 @@
+
+import 'package:flutter/material.dart';
+import 'package:nexwage/widget/commonAppBar.dart';
+import 'package:provider/provider.dart';
+
+
+import '../../../util/color/app_colors.dart';
+
+import '../../../widget/custom_text.dart';
+import '../provider/cmsProvider.dart';
+
+class TermsConditions extends StatefulWidget {
+  const TermsConditions({super.key});
+
+  @override
+  State<TermsConditions> createState() => _TermsConditionsState();
+}
+
+class _TermsConditionsState extends State<TermsConditions> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// Call API after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CmsProvider>().fetchCmsData();
+    });
+  }
+
+  /// Remove HTML tags safely
+  String parseHtmlString(String htmlString) {
+    final regex = RegExp(r'<[^>]*>');
+    return htmlString.replaceAll(regex, '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<CmsProvider>(
+      builder: (context, provider, child) {
+
+        /// 1️⃣ Loading state
+        if (provider.loading) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        /// 2️⃣ Null / empty data check
+        final cmsData = provider.getCmsData;
+        final terms = cmsData?.data?.termsCondition;
+
+        if (terms == null || terms.isEmpty) {
+          return Scaffold(
+            appBar: CommonAppBar(title: 'Terms & Conditions'),
+            body: const Center(
+              child: CustomText(
+                'No Terms & Conditions available.',
+                size: 14,
+              ),
+            ),
+          );
+        }
+
+        /// 3️⃣ Success state
+        return Scaffold(
+          backgroundColor: ColorResource.white,
+          appBar: CommonAppBar(title: 'Privacy Policy'),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: CustomText(
+              parseHtmlString(terms),
+              size: 14,
+            ),
+          ),
+
+
+        );
+      },
+    );
+  }
+}
