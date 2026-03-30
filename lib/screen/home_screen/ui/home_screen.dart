@@ -46,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     loadInitialData();
-    restoreShiftAndTimer();
   }
 
   void loadInitialData() async {
@@ -263,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // 🔥 Save locally
           await prefs.setString('shiftStart', shiftStart!);
           await prefs.setString('shiftEnd', shiftEnd);
-          await prefs.setString('punchTime', shiftStart!);
+          await prefs.setString('punchTime', currentTimestamp);
 
           attendanceProvider.shiftStart = shiftStart;
           attendanceProvider.shiftEnd = shiftEnd;
@@ -859,6 +858,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    restoreShiftAndTimer();
     return Consumer4<
       ProfileProvider,
       AppVersionProvider,

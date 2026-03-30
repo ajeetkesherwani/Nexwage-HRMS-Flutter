@@ -29,6 +29,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   void initState() {
     super.initState();
     loadDeviceId();
+    restoreShiftAndTimer();
     Provider.of<AttendanceProvider>(
       context,
       listen: false,
@@ -36,203 +37,23 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   String deviceId = "";
-  void loadDeviceId() async {
-    String id = await DeviceService.getDeviceId();
-    setState(() {
-      deviceId = id;
-    });
-  }
-
-  //Panch - Out
-
-  void getLocationPanchOutData(BuildContext context) async {
-    Position? position = await getUserLocation();
-
-    if (position != null) {
-      double latitude = position.latitude;
-      double longitude = position.longitude;
-
-      final prefs = await SharedPreferences.getInstance();
-
-      double officeLat = prefs.getDouble('officeLatitude') ?? 0.0;
-      double officeLng = prefs.getDouble('officeLongitude') ?? 0.0;
-      double allowedRadius = prefs.getDouble('attendanceRadius') ?? 100;
-      bool allowOutside = prefs.getBool('allowOutsideLocation') ?? false;
-
-      double distance = Geolocator.distanceBetween(
-        latitude,
-        longitude,
-        officeLat,
-        officeLng,
-      );
-
-      print("Latitude: $latitude");
-      print("Longitude: $longitude");
-      print("Distance: $distance meters");
-      print("Device ID: $deviceId");
-      print("Time Stamp: $timestamp");
-      print("officeLat: $officeLat");
-      print("officeLng: $officeLng");
-      print("allowedRadius: $allowedRadius");
-      print("allowOutside: $allowOutside");
-
-      if (allowOutside || distance <= allowedRadius) {
-        print("✅ Attendance Marked");
-
-        Map<String, dynamic> data = {
-          "latitude": latitude,
-          "longitude": longitude,
-          // "device_id": deviceId,
-          "timestamp": getCurrentTimestamp(),
-        };
-        final attendanceProvider = Provider.of<AttendanceProvider>(
-          context,
-          listen: false,
-        );
-
-        await attendanceProvider.PostAttendanceOutData(
-          latitude: latitude,
-          longitude: longitude,
-          //device_id: deviceId,
-          timestamp: getCurrentTimestamp(),
-        );
-        if (attendanceProvider.error == null) {
-          showPunchOutSuccessDialog(context);
-        } else {
-          print("API ERROR: ${attendanceProvider.error}");
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(attendanceProvider.error!)));
-        }
-        print("API DATA: $data");
-        showPunchOutSuccessDialog(context);
-      } else {
-        double extraDistance = distance;
-
-        showPunchOutOutOfRangeDialog(context, extraDistance);
-      }
-    }
-  }
-
-  void showPunchOutSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-
-          /// 🔹 Title
-          title: Center(
-            child: CustomText(
-              "Success",
-              size: 18,
-              weight: FontWeight.w700,
-              color: ColorResource.black,
-            ),
-          ),
-
-          /// 🔹 Content
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.logout, // 👈 Punch Out icon
-                color: Colors.orange,
-                size: 60,
-              ),
-              SizedBox(height: 10),
-              CustomText(
-                "Punch Out Successfully", // 👈 changed text
-                size: 13,
-                weight: FontWeight.w400,
-                color: ColorResource.black,
-              ),
-            ],
-          ),
-
-          /// 🔹 Button
-          actions: [
-            CommonAppButton(
-              text: "OK",
-              backgroundColor1: ColorResource.button1,
-              backgroundColor2: ColorResource.button1,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showPunchOutOutOfRangeDialog(BuildContext context, double distance) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.logout, // 👈 better for punch out
-                  color: Colors.orange,
-                  size: 40,
-                ),
-
-                const SizedBox(height: 20),
-
-                CustomText(
-                  'Out of Range',
-                  size: 20,
-                  weight: FontWeight.w700,
-                  color: ColorResource.black,
-                ),
-
-                const SizedBox(height: 10),
-
-                CustomText(
-                  "You are ${distance.toStringAsFixed(0)}m away from the office premises. Please move closer to punch out.",
-                  size: 14,
-                  weight: FontWeight.w400,
-                  color: ColorResource.gray,
-                  align: TextAlign.center,
-                ),
-
-                const SizedBox(height: 25),
-
-                CommonAppButton(
-                  text: 'Try Again',
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  backgroundColor1: ColorResource.button1,
-                  backgroundColor2: ColorResource.button1,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-  //Panch - In
+  bool isPunchedIn = false;
+  Timer? _timer;
+  Duration _duration = Duration();
 
   bool _dialogShown = false;
 
-  Timer? _timer;
-  Duration _duration = Duration();
+  void loadDeviceId() async {
+    String id = await DeviceService.getDeviceId();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('deviceId', id); // ✅ SAVE
+
+    if (mounted) {
+      setState(() {
+        deviceId = id;
+      });
+    }
+  }
 
   String get timerText {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -252,7 +73,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (shiftStart == null || shiftEnd == null || punchTimeStr == null) return;
 
     DateTime punchTime = DateTime.parse(punchTimeStr);
-    DateTime now = DateTime.now();
+
+    final now = DateTime.now();
 
     if (punchTime.year == now.year &&
         punchTime.month == now.month &&
@@ -265,27 +87,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       attendanceProvider.shiftStart = shiftStart;
       attendanceProvider.shiftEnd = shiftEnd;
 
-      // 🔥 DIRECT duration calculate (important)
-      final endParts = shiftEnd.split(":");
-
-      final endDateTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        int.parse(endParts[0]),
-        int.parse(endParts[1]),
-      );
-
       setState(() {
-        if (now.isAfter(endDateTime)) {
+        if (now.isBefore(punchTime)) {
           _duration = Duration.zero;
         } else {
-          _duration = endDateTime.difference(now);
+          _duration = now.difference(punchTime);
+          startTimer(shiftStart);
         }
       });
-
-      // 🔥 restart timer
-      startTimer(shiftStart, shiftEnd);
     } else {
       prefs.remove('shiftStart');
       prefs.remove('shiftEnd');
@@ -308,18 +117,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
-  void startTimer(String startTime, String endTime) {
+  void startTimer(String startTime) {
+    final attendanceProvider = Provider.of<AttendanceProvider>(
+      context,
+      listen: false,
+    );
     try {
+      setState(() {
+        isPunchedIn = true;
+      });
       final now = DateTime.now();
 
-      final endParts = endTime.split(":");
+      final startParts = startTime.split(":");
 
-      final endDateTime = DateTime(
+      final startDateTime = DateTime(
         now.year,
         now.month,
         now.day,
-        int.parse(endParts[0]),
-        int.parse(endParts[1]),
+        int.parse(startParts[0]),
+        int.parse(startParts[1]),
       );
 
       _timer?.cancel();
@@ -330,20 +146,28 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         final currentTime = DateTime.now();
 
         setState(() {
-          if (currentTime.isAfter(endDateTime)) {
+          if (currentTime.isBefore(startDateTime)) {
             _duration = Duration.zero;
           } else {
-            _duration = endDateTime.difference(currentTime);
+            _duration = currentTime.difference(startDateTime);
           }
         });
       });
     } catch (e) {
       debugPrint("Timer Error: $e");
+      setState(() {
+        isPunchedIn = false;
+      });
     }
   }
 
   void getLocationData(BuildContext context) async {
     try {
+      final attendanceProvider = Provider.of<AttendanceProvider>(
+        context,
+        listen: false,
+      );
+
       Position? position = await getUserLocation();
 
       if (position == null) {
@@ -370,15 +194,105 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         officeLng,
       );
 
-      print("Latitude: $latitude");
-      print("Longitude: $longitude");
-      print("Distance: $distance meters");
-      print("Device ID: $deviceId");
-      print("Time Stamp: $timestamp");
-      print("officeLat: $officeLat");
-      print("officeLng: $officeLng");
-      print("allowedRadius: $allowedRadius");
-      print("allowOutside: $allowOutside");
+      debugPrint(" USER LOCATION: $latitude , $longitude");
+      debugPrint(" OFFICE LOCATION: $officeLat , $officeLng");
+      debugPrint(" DISTANCE: $distance meters");
+      debugPrint(" DEVICE ID: $deviceId");
+
+      if (!(allowOutside || distance <= allowedRadius)) {
+        showOutOfRangeDialog(context, distance);
+        return;
+      }
+
+      final currentTimestamp = await attendanceProvider.getPublicTime();
+
+      if (currentTimestamp == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Unable to fetch time")));
+        return;
+      }
+
+      final checkInResponse = await attendanceProvider.PostAttendanceData(
+        latitude: latitude,
+        longitude: longitude,
+        device_id: DeviceManager.deviceId,
+        timestamp: currentTimestamp,
+      );
+
+      if (attendanceProvider.error == null) {
+        final data = attendanceProvider.postWalletResponse?.data;
+
+        if (data != null) {
+          final prefs = await SharedPreferences.getInstance();
+
+          final shiftStart = checkInResponse?.data!.punchInTime!;
+          String shiftEnd = data.shift?.end ?? "18:00";
+
+          // 🔥 Save locally
+          await prefs.setString('shiftStart', shiftStart!);
+          await prefs.setString('shiftEnd', shiftEnd);
+          await prefs.setString('punchTime', currentTimestamp);
+
+          attendanceProvider.shiftStart = shiftStart;
+          attendanceProvider.shiftEnd = shiftEnd;
+
+          // 🔥 Start timer
+          startTimer(shiftStart!);
+        }
+
+        showAttendanceSuccessDialog(context);
+      } else if (attendanceProvider.error!.toLowerCase().contains("already")) {
+        await prefs.setString('shiftStart', attendanceProvider.startTime!);
+        showAlreadyMarkedDialog(context);
+      } else {
+        debugPrint("❌ API ERROR: ${attendanceProvider.error}");
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(attendanceProvider.error!)));
+      }
+    } catch (e) {
+      debugPrint("🔥 ERROR: $e");
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Something went wrong")));
+    }
+  }
+
+  void punchOut(BuildContext context) async {
+    try {
+      final attendanceProvider = Provider.of<AttendanceProvider>(
+        context,
+        listen: false,
+      );
+
+      Position? position = await getUserLocation();
+
+      if (position == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Unable to fetch location")),
+        );
+        return;
+      }
+
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
+      final prefs = await SharedPreferences.getInstance();
+
+      double officeLat = prefs.getDouble('officeLatitude') ?? 0.0;
+      double officeLng = prefs.getDouble('officeLongitude') ?? 0.0;
+      double allowedRadius = prefs.getDouble('attendanceRadius') ?? 100;
+      bool allowOutside = prefs.getBool('allowOutsideLocation') ?? false;
+
+      double distance = Geolocator.distanceBetween(
+        latitude,
+        longitude,
+        officeLat,
+        officeLng,
+      );
 
       debugPrint(" USER LOCATION: $latitude , $longitude");
       debugPrint(" OFFICE LOCATION: $officeLat , $officeLng");
@@ -390,42 +304,47 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         return;
       }
 
-      final attendanceProvider = Provider.of<AttendanceProvider>(
-        context,
-        listen: false,
-      );
+      final currentTimestamp = await attendanceProvider.getPublicTime();
 
-      await attendanceProvider.PostAttendanceData(
+      if (currentTimestamp == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Unable to fetch time")));
+        return;
+      }
+
+      final checkInResponse = await attendanceProvider.PostAttendanceOutData(
         latitude: latitude,
         longitude: longitude,
-        device_id: DeviceManager.deviceId,
-        timestamp: getCurrentTimestamp(),
+        timestamp: currentTimestamp,
       );
 
       if (attendanceProvider.error == null) {
-        final data = attendanceProvider.postWalletResponse?.data;
+        final data = attendanceProvider.panchOutResponse?.data;
 
         if (data != null) {
           final prefs = await SharedPreferences.getInstance();
 
-          String shiftStart = data.shift?.start ?? "09:00";
-          String shiftEnd = data.shift?.end ?? "18:00";
+          final shiftStart = checkInResponse?.data!.punchInTime!;
+          String shiftEnd = data.punchOutTime ?? "18:00";
 
           // 🔥 Save locally
-          await prefs.setString('shiftStart', shiftStart);
-          await prefs.setString('shiftEnd', shiftEnd);
-          await prefs.setString('punchTime', DateTime.now().toIso8601String());
-
-          // 🔥 Update provider
+          await prefs.remove('shiftStart');
+          await prefs.remove('shiftEnd');
+          await prefs.remove('punchTime');
+          _timer?.cancel();
           attendanceProvider.shiftStart = shiftStart;
           attendanceProvider.shiftEnd = shiftEnd;
-
-          // 🔥 Start timer
-          startTimer(shiftStart, shiftEnd);
         }
 
-        showAttendanceSuccessDialog(context);
+        showPunchOutSuccessDialog(context);
+        setState(() {
+          isPunchedIn = false;
+          _timer?.cancel();
+          _duration = Duration.zero;
+        });
       } else if (attendanceProvider.error!.toLowerCase().contains("already")) {
+        await prefs.setString('shiftStart', attendanceProvider.startTime!);
         showAlreadyMarkedDialog(context);
       } else {
         debugPrint("❌ API ERROR: ${attendanceProvider.error}");
@@ -535,6 +454,61 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
+  void showPunchOutSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+
+          /// 🔹 Title
+          title: Center(
+            child: CustomText(
+              "Success",
+              size: 18,
+              weight: FontWeight.w700,
+              color: ColorResource.black,
+            ),
+          ),
+
+          /// 🔹 Content
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.logout, // 👈 Punch Out icon
+                color: Colors.orange,
+                size: 60,
+              ),
+              SizedBox(height: 10),
+              CustomText(
+                "Punch Out Successfully", // 👈 changed text
+                size: 13,
+                weight: FontWeight.w400,
+                color: ColorResource.black,
+              ),
+            ],
+          ),
+
+          /// 🔹 Button
+          actions: [
+            CommonAppButton(
+              text: "OK",
+              backgroundColor1: ColorResource.button1,
+              backgroundColor2: ColorResource.button1,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void showAttendanceSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -636,11 +610,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  String getCurrentTimestamp() {
-    return DateTime.now().toIso8601String(); // ✅ IST
-  }
-
-  String timestamp = DateTime.now().toIso8601String();
   Future<Position?> getUserLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -695,6 +664,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    restoreShiftAndTimer();
     return Consumer<AttendanceProvider>(
       builder: (context, attendanceProvider, child) {
         final duration = attendanceProvider.duration;
@@ -731,7 +701,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             CustomText(
-                              "$hours:$minutes:$seconds",
+                              timerText,
                               size: 25,
                               weight: FontWeight.w700,
                               color: ColorResource.black,
@@ -753,7 +723,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         checkInCard(
                           image: AppImages.checkIn,
                           title: 'Clock In',
-                          subTitle: '09:00 AM',
+                          subTitle: formatTime(
+                            attendanceProvider.shiftStart ?? "09:00",
+                          ),
                           backgroundColor: ColorResource.white,
                           subtitleColor: ColorResource.grayText,
                           titleColor: ColorResource.black,
@@ -770,7 +742,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           subtitleColor: ColorResource.white,
                           titleColor: ColorResource.white,
                           onTap: () {
-                            getLocationPanchOutData(context);
+                            punchOut(context);
                           },
                         ),
                       ],
@@ -846,24 +818,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               color: ColorResource.black,
                             ),
                             CustomText(
-                              attendanceProvider
-                                              ?.todayAttendanceModel
-                                              ?.data
-                                              ?.sessions !=
-                                          null &&
-                                      attendanceProvider!
-                                          .todayAttendanceModel!
-                                          .data!
-                                          .sessions!
-                                          .isNotEmpty
-                                  ? attendanceProvider
-                                            .todayAttendanceModel!
-                                            .data!
-                                            .sessions!
-                                            .last
-                                            .clockIn ??
-                                        ""
-                                  : "—",
+                              formatTime(
+                                attendanceProvider.shiftStart ?? "09:00",
+                              ),
                               size: 12,
                               weight: FontWeight.w400,
                               color: ColorResource.gray,
