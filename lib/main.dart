@@ -5,6 +5,7 @@ import 'package:nexwage/screen/cmsScreen/provider/cmsProvider.dart';
 import 'package:nexwage/screen/holidays/provider/holiday_provider.dart';
 import 'package:nexwage/screen/home_screen/provider/home_provider.dart';
 import 'package:nexwage/screen/hr_reports/monthly_attendance/provider/report_provider.dart';
+import 'package:nexwage/screen/leave_screen/provider/leave_provider.dart';
 import 'package:nexwage/screen/profile/provider/profile_provider.dart';
 import 'package:nexwage/screen/splash/splash_screen.dart';
 import 'package:nexwage/screen/version_update/provider/version_provider.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => HoliDayProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => ReportProvider()),
+        ChangeNotifierProvider(create: (_) => LeaveProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

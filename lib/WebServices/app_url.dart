@@ -17,6 +17,7 @@ class AppUrl {
   static const String panchOut = '$baseUrl/api/employee/attendance/punch-out';
   static const String todayAttendance = '$baseUrl/api/employee/attendance/today';
   static const String home = '$baseUrl/api/employee/home';
+  static const String leave = '$baseUrl/api/employee/leave-summary';
 
  static const String getMonthlyAttendance =
      '$baseUrl/api/employee/attendance/calendar';

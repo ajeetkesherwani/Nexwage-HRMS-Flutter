@@ -367,7 +367,8 @@ class _HomeScreenState extends State<HomeScreen> {
           attendanceProvider.shiftEnd = shiftEnd;
         }
 
-        showPunchOutSuccessDialog(context);
+       // showPunchOutSuccessDialog(context);
+        showPunchOutConfirmDialog(context);
         setState(() {
           isPunchedIn = false;
           _timer?.cancel();
@@ -392,6 +393,81 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void showPunchOutConfirmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+
+          /// 🔹 Title
+          title: Center(
+            child: CustomText(
+              "Confirm",
+              size: 18,
+              weight: FontWeight.w700,
+              color: ColorResource.black,
+            ),
+          ),
+
+          /// 🔹 Content
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.help_outline,
+                color: Colors.orange,
+                size: 60,
+              ),
+              SizedBox(height: 10),
+              CustomText(
+                "Are you sure you want to Punch Out?",
+                size: 13,
+                weight: FontWeight.w400,
+                color: ColorResource.black,
+              ),
+            ],
+          ),
+
+          /// 🔹 Buttons
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: CommonAppButton(
+                    text: "No",
+                    backgroundColor1: Colors.grey,
+                    backgroundColor2: Colors.grey,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: CommonAppButton(
+                    text: "Yes",
+                    backgroundColor1: ColorResource.button1,
+                    backgroundColor2: ColorResource.button1,
+                    onPressed: () {
+                      Navigator.pop(context); // close confirm
+
+                      /// 👉 Call success dialog
+                      showPunchOutSuccessDialog(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
   void showPunchOutSuccessDialog(BuildContext context) {
     showDialog(
       context: context,

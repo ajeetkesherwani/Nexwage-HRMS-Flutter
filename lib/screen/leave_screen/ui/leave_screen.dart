@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexwage/screen/leave_screen/provider/leave_provider.dart';
 import 'package:nexwage/util/color/app_colors.dart';
 import 'package:nexwage/util/image_resource/image_resource.dart';
 import 'package:nexwage/widget/commonAppBar.dart';
@@ -6,8 +7,7 @@ import 'package:nexwage/widget/commonAppButton.dart';
 import 'package:nexwage/widget/customImageView.dart';
 import 'package:nexwage/widget/custom_text.dart';
 import 'package:nexwage/widget/navigator_method.dart';
-
-import '../model/leaveModel.dart';
+import 'package:provider/provider.dart';
 import '../model/recentLeaveModel.dart';
 import 'apply_for_leave.dart';
 class LeaveScreen extends StatefulWidget {
@@ -18,30 +18,14 @@ class LeaveScreen extends StatefulWidget {
 }
 
 class _LeaveScreenState extends State<LeaveScreen> {
-  List<LeaveModel> leaveList = [
-    LeaveModel(
-      image: AppImages.sick,
-      title: '08',
-      subtitle: 'Sick Leave',
-      color: ColorResource.button1,
-      value: 0.40,
-    ),
-    LeaveModel(
-      image: AppImages.casual,
-      title: '05',
-      subtitle: 'Casual Leave',
-      color: ColorResource.green,
-      value: 0.70,
-    ),
-    LeaveModel(
-      image: AppImages.casual,
-      title: '10',
-      subtitle: 'Paid Leave',
-      color: ColorResource.red,
-      value: 0.50,
-    ),
-  ];
-
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<LeaveProvider>(context, listen: false).getLeaveData();
+    });
+  }
+  //
   List<RecentLeaveModel> recentLeaveList = [
     RecentLeaveModel(
       type: 'ANNUAL LEAVE',
@@ -67,90 +51,115 @@ class _LeaveScreenState extends State<LeaveScreen> {
       status: 'REJECTED',
     ),
   ];
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-        child: Scaffold(
-          appBar: CommonAppBar(title: 'Leave Portal',isBack: false,),
-          backgroundColor: ColorResource.white,
-          body: Padding(
-              padding: EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  'LEAVE BALANCE',
-                  size: 14,
-                  weight: FontWeight.w700,
-                  color: ColorResource.gray,
-                ),
-                SizedBox(height: 10,),
-                SizedBox(
-                  height: 152,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: leaveList.length,
-                    itemBuilder: (context, index) {
-                      final data = leaveList[index];
+    return Consumer<LeaveProvider>(
+        builder: (context, leaveProvider, child) {
+          final leaveList = leaveProvider.getLeaveModel?.leaveSummary;
+          return  SafeArea(
+              top: false,
+              child: Scaffold(
+                appBar: CommonAppBar(title: 'Leave Portal',isBack: false,),
+                backgroundColor: ColorResource.white,
+                body: Padding(
+                  padding: EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        'LEAVE BALANCE',
+                        size: 14,
+                        weight: FontWeight.w700,
+                        color: ColorResource.gray,
+                      ),
+                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 152,
+                        child: (leaveList == null || leaveList.isEmpty)
+                            ? Center(
+                          child: Text(
+                            "No leave data available",
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        )
+                            : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: leaveList.length,
+                          itemBuilder: (context, index) {
+                            final data = leaveList[index];
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: leaveCard(
-                          image: data.image,
-                          title: data.title,
-                          subtitle: data.subtitle,
-                          color: data.color,
-                          value: data.value,
+                            final List<Color> leaveColors = [
+                              Colors.blue,
+                              Colors.green,
+                              Colors.orange,
+                              Colors.purple,
+                              Colors.red,
+                            ];
+
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: leaveCard(
+                                image: AppImages.sick,
+                                title: (data.allocatedLeaves ?? 0).toString(),
+                                subtitle: data.leaveTypeName ?? "N/A",
+                                color: leaveColors[index % leaveColors.length],
+                                value: (data.usedLeaves is num)
+                                    ? (data.usedLeaves as num).toDouble()
+                                    : 0.0,
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                      SizedBox(height: 20,),
+                      CommonAppButton(
+                        text:'Apply Leave',
+                        backgroundColor1: ColorResource.button1,
+                        backgroundColor2: ColorResource.button1,
+                        onPressed: (){
+                          navPush(context: context, action: ApplyForLeaveScreen());
+                        },image: AppImages.plus,),
+                      SizedBox(height: 10,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomText(
+                            'RECENT APPLICATIONS',
+                            size: 16,
+                            weight: FontWeight.w700,
+                            color: ColorResource.black,
+                          ),
+                          CustomText(
+                            'View All',
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: ColorResource.button1,
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 10,),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: recentLeaveList.length,
+                          itemBuilder: (context, index) {
+                            final data = recentLeaveList[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: recentApplicationCard(data),
+                            );
+                          },
+                        ),
+                      )
+                    ],
                   ),
                 ),
-                SizedBox(height: 20,),
-                CommonAppButton(
-                  text:'Apply Leave',
-                  backgroundColor1: ColorResource.button1,
-                  backgroundColor2: ColorResource.button1,
-                  onPressed: (){
-                  navPush(context: context, action: ApplyForLeaveScreen());
-                },image: AppImages.plus,),
-                SizedBox(height: 10,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomText(
-                      'RECENT APPLICATIONS',
-                      size: 16,
-                      weight: FontWeight.w700,
-                      color: ColorResource.black,
-                    ),
-                    CustomText(
-                      'View All',
-                      size: 12,
-                      weight: FontWeight.w600,
-                      color: ColorResource.button1,
-                    )
-                  ],
-                ),
-                SizedBox(height: 10,),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: recentLeaveList.length,
-                    itemBuilder: (context, index) {
-                      final data = recentLeaveList[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: recentApplicationCard(data),
-                      );
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
-        )
+              )
+          );
+        }
     );
+
+
   }
   Widget recentApplicationCard(RecentLeaveModel data) {
     Color statusColor;
@@ -285,7 +294,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
     required String subtitle,
     required Color color,
     required double value,
-}){
+  }){
     return Container(
       padding: EdgeInsets.all(15),
       decoration: ShapeDecoration(
@@ -310,7 +319,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomImageView(
-              imagePath: image,
+            imagePath: image,
             height: 32,
             width: 32,
           ),SizedBox(height: 10,),
