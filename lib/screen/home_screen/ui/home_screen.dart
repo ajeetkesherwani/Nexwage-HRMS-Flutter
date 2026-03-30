@@ -259,7 +259,6 @@ class _HomeScreenState extends State<HomeScreen> {
           await prefs.setString('shiftEnd', shiftEnd);
           await prefs.setString('punchTime', DateTime.now().toIso8601String());
 
-          // 🔥 Update provider
           attendanceProvider.shiftStart = shiftStart;
           attendanceProvider.shiftEnd = shiftEnd;
 
