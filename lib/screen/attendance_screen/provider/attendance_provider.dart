@@ -4,6 +4,7 @@ import '../model/attendance_model.dart';
 import '../model/panchOut_model.dart';
 import '../model/today_attendance_model.dart';
 import '../repo/attendance_repo.dart';
+import 'dart:async';
 
 class AttendanceProvider with ChangeNotifier {
   final AttendanceRepository _repo = AttendanceRepository();
@@ -19,14 +20,14 @@ class AttendanceProvider with ChangeNotifier {
   dynamic startTime;
 
   void setDuration(Duration duration) {
-    _duration = duration;
+    duration = duration;
     notifyListeners();
   }
 
   String? _error;
   String? get error => _error;
 
-  Future<void> PostAttendanceData({
+  Future<AttendanceModel?> PostAttendanceData({
     required double latitude,
     required double longitude,
     required String device_id,
@@ -44,13 +45,14 @@ class AttendanceProvider with ChangeNotifier {
         timestamp: timestamp,
       );
 
-      print("FULL API RESPONSE: $response");
+      print("FULL API RESPONSE: ${response.data.toString()}");
 
       _postWalletResponse = response;
 
       // ✅ MAIN FIX HERE
       if (response.status == true) {
         // SUCCESS
+        return response;
         _error = null;
       } else {
         _error = response.message ?? "Something went wrong";
@@ -67,7 +69,7 @@ class AttendanceProvider with ChangeNotifier {
 
   PanchOutModel? _panchOutResponse;
   PanchOutModel? get panchOutResponse => _panchOutResponse;
-  Future<void> PostAttendanceOutData({
+  Future<PanchOutModel?> PostAttendanceOutData({
     required double latitude,
     required double longitude,
     required String timestamp,
@@ -82,6 +84,11 @@ class AttendanceProvider with ChangeNotifier {
         longitude: longitude,
         timestamp: timestamp,
       );
+      if (_panchOutResponse!.status! == true) {
+        return _panchOutResponse!;
+      } else {
+        _error = _panchOutResponse?.message ?? "Something went wrong";
+      }
     } catch (e) {
       _error = e.toString();
     } finally {

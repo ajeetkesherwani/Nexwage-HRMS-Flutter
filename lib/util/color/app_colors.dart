@@ -13,6 +13,7 @@ class ColorResource {
   static const Color button1 = Color(0xFF0052CC);
   static const Color button2 = Color(0xFF002966);
   static const Color greenBackground = Color(0xFFECFDF5);
+  static const Color greyBackground = Color(0xFFA4A8A5);
   static const Color green = Color(0xFF139A6D);
   static const Color grayText = Color(0xFFA49C9C);
   static const Color menu1 = Color(0xFFEFF6FF);
@@ -28,11 +29,6 @@ class ColorResource {
   static const Color redBackground = Color(0xFFFEE2E2);
   static const Color red = Color(0xFFB91C1C);
 
-
   static const Color white = Colors.white;
   static const Color black = Colors.black;
-
-
 }
-
-

@@ -233,6 +233,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Timer? _timer;
   Duration _duration = Duration();
+
   String get timerText {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(_duration.inHours);
@@ -757,7 +758,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           subtitleColor: ColorResource.grayText,
                           titleColor: ColorResource.black,
                           onTap: () {
-                            // AttendanceService.markAttendance(context);
                             getLocationData(context);
                           },
                         ),

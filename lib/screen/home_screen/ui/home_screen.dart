@@ -13,8 +13,6 @@ import 'package:nexwage/widget/navigator_method.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-//import '../../../util/core/attendance_service/attendance_service.dart';
 import '../../../util/core/device_id/device_service.dart';
 import '../../../widget/commonAppButton.dart';
 import '../../attendance_screen/provider/attendance_provider.dart';
@@ -41,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   Duration _duration = Duration();
 
+  bool isPunchedIn = false;
   String deviceId = "";
 
   @override
@@ -106,7 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     DateTime punchTime = DateTime.parse(punchTimeStr);
 
-    // ✅ apply server offset if you have it
     final now = DateTime.now();
 
     if (punchTime.year == now.year &&
@@ -124,12 +122,10 @@ class _HomeScreenState extends State<HomeScreen> {
         if (now.isBefore(punchTime)) {
           _duration = Duration.zero;
         } else {
-          _duration = now.difference(punchTime); // ✅ count up
+          _duration = now.difference(punchTime);
+          startTimer(shiftStart);
         }
       });
-
-      // 🔥 restart timer (ONLY needs start time now)
-      startTimer(shiftStart);
     } else {
       prefs.remove('shiftStart');
       prefs.remove('shiftEnd');
@@ -153,7 +149,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void startTimer(String startTime) {
+    final attendanceProvider = Provider.of<AttendanceProvider>(
+      context,
+      listen: false,
+    );
     try {
+      setState(() {
+        isPunchedIn = true;
+      });
       final now = DateTime.now();
 
       final startParts = startTime.split(":");
@@ -183,6 +186,9 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       debugPrint("Timer Error: $e");
+      setState(() {
+        isPunchedIn = false;
+      });
     }
   }
 
@@ -238,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      await attendanceProvider.PostAttendanceData(
+      final checkInResponse = await attendanceProvider.PostAttendanceData(
         latitude: latitude,
         longitude: longitude,
         device_id: DeviceManager.deviceId,
@@ -251,23 +257,24 @@ class _HomeScreenState extends State<HomeScreen> {
         if (data != null) {
           final prefs = await SharedPreferences.getInstance();
 
-          String shiftStart = data.shift?.start ?? "09:00";
+          final shiftStart = checkInResponse?.data!.punchInTime!;
           String shiftEnd = data.shift?.end ?? "18:00";
 
           // 🔥 Save locally
-          await prefs.setString('shiftStart', shiftStart);
+          await prefs.setString('shiftStart', shiftStart!);
           await prefs.setString('shiftEnd', shiftEnd);
-          await prefs.setString('punchTime', DateTime.now().toIso8601String());
+          await prefs.setString('punchTime', shiftStart!);
 
           attendanceProvider.shiftStart = shiftStart;
           attendanceProvider.shiftEnd = shiftEnd;
 
           // 🔥 Start timer
-          startTimer(shiftStart);
+          startTimer(shiftStart!);
         }
 
         showAttendanceSuccessDialog(context);
       } else if (attendanceProvider.error!.toLowerCase().contains("already")) {
+        await prefs.setString('shiftStart', attendanceProvider.startTime!);
         showAlreadyMarkedDialog(context);
       } else {
         debugPrint("❌ API ERROR: ${attendanceProvider.error}");
@@ -283,6 +290,162 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text("Something went wrong")));
     }
+  }
+
+  void punchOut(BuildContext context) async {
+    try {
+      final attendanceProvider = Provider.of<AttendanceProvider>(
+        context,
+        listen: false,
+      );
+
+      Position? position = await getUserLocation();
+
+      if (position == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Unable to fetch location")),
+        );
+        return;
+      }
+
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
+      final prefs = await SharedPreferences.getInstance();
+
+      double officeLat = prefs.getDouble('officeLatitude') ?? 0.0;
+      double officeLng = prefs.getDouble('officeLongitude') ?? 0.0;
+      double allowedRadius = prefs.getDouble('attendanceRadius') ?? 100;
+      bool allowOutside = prefs.getBool('allowOutsideLocation') ?? false;
+
+      double distance = Geolocator.distanceBetween(
+        latitude,
+        longitude,
+        officeLat,
+        officeLng,
+      );
+
+      debugPrint(" USER LOCATION: $latitude , $longitude");
+      debugPrint(" OFFICE LOCATION: $officeLat , $officeLng");
+      debugPrint(" DISTANCE: $distance meters");
+      debugPrint(" DEVICE ID: $deviceId");
+
+      if (!(allowOutside || distance <= allowedRadius)) {
+        showOutOfRangeDialog(context, distance);
+        return;
+      }
+
+      final currentTimestamp = await attendanceProvider.getPublicTime();
+
+      if (currentTimestamp == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Unable to fetch time")));
+        return;
+      }
+
+      final checkInResponse = await attendanceProvider.PostAttendanceOutData(
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: currentTimestamp,
+      );
+
+      if (attendanceProvider.error == null) {
+        final data = attendanceProvider.panchOutResponse?.data;
+
+        if (data != null) {
+          final prefs = await SharedPreferences.getInstance();
+
+          final shiftStart = checkInResponse?.data!.punchInTime!;
+          String shiftEnd = data.punchOutTime ?? "18:00";
+
+          // 🔥 Save locally
+          await prefs.remove('shiftStart');
+          await prefs.remove('shiftEnd');
+          await prefs.remove('punchTime');
+
+          attendanceProvider.shiftStart = shiftStart;
+          attendanceProvider.shiftEnd = shiftEnd;
+        }
+
+        showPunchOutSuccessDialog(context);
+        setState(() {
+          isPunchedIn = false;
+          _timer?.cancel();
+          _duration = Duration.zero;
+        });
+      } else if (attendanceProvider.error!.toLowerCase().contains("already")) {
+        await prefs.setString('shiftStart', attendanceProvider.startTime!);
+        showAlreadyMarkedDialog(context);
+      } else {
+        debugPrint("❌ API ERROR: ${attendanceProvider.error}");
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(attendanceProvider.error!)));
+      }
+    } catch (e) {
+      debugPrint("🔥 ERROR: $e");
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Something went wrong")));
+    }
+  }
+
+  void showPunchOutSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+
+          /// 🔹 Title
+          title: Center(
+            child: CustomText(
+              "Success",
+              size: 18,
+              weight: FontWeight.w700,
+              color: ColorResource.black,
+            ),
+          ),
+
+          /// 🔹 Content
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.logout, // 👈 Punch Out icon
+                color: Colors.orange,
+                size: 60,
+              ),
+              SizedBox(height: 10),
+              CustomText(
+                "Punch Out Successfully", // 👈 changed text
+                size: 13,
+                weight: FontWeight.w400,
+                color: ColorResource.black,
+              ),
+            ],
+          ),
+
+          /// 🔹 Button
+          actions: [
+            CommonAppButton(
+              text: "OK",
+              backgroundColor1: ColorResource.button1,
+              backgroundColor2: ColorResource.button1,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void showAttendanceSuccessDialog(BuildContext context) {
@@ -819,7 +982,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           child: SingleChildScrollView(
                             physics: BouncingScrollPhysics(),
-                            //  padding: const EdgeInsets.all(15),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -842,12 +1004,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                   child: _buildCardItem(
                                     timer: timerText,
-                                    shipt:
+                                    shiftStatus: isPunchedIn
+                                        ? "ON SHIFT"
+                                        : "OFF SHIFT",
+                                    buttonText: isPunchedIn
+                                        ? "Clock-Out"
+                                        : "Clock-In",
+                                    shift:
                                         "Shift ${formatTime(attendanceProvider.shiftStart ?? "09:00")} - "
                                         "${formatTime(attendanceProvider.shiftEnd ?? "18:00")}",
-                                    onTap: () async {
-                                      getLocationData(context);
-                                    },
+                                    onTap: isPunchedIn
+                                        ? () {
+                                            punchOut(context);
+                                          }
+                                        : () {
+                                            getLocationData(context);
+                                          },
                                   ),
                                 ),
 
@@ -1195,7 +1367,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCardItem({
     required String timer,
-    required String shipt,
+    required String shift,
+    required String shiftStatus,
+    required String buttonText,
     required VoidCallback onTap,
   }) {
     return Column(
@@ -1214,16 +1388,20 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               clipBehavior: Clip.antiAlias,
               decoration: ShapeDecoration(
-                color: ColorResource.greenBackground,
+                color: shiftStatus.contains("ON")
+                    ? ColorResource.greenBackground
+                    : ColorResource.greyBackground,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(53),
                 ),
               ),
               child: CustomText(
-                'ON SHIFT',
+                shiftStatus,
                 size: 10,
                 weight: FontWeight.w700,
-                color: ColorResource.green,
+                color: shift.contains("ON")
+                    ? ColorResource.green
+                    : Colors.black,
               ),
             ),
           ],
@@ -1242,7 +1420,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: ColorResource.black,
                 ),
                 CustomText(
-                  shipt,
+                  shift,
                   size: 10,
                   weight: FontWeight.w600,
                   color: ColorResource.grayText,
@@ -1258,7 +1436,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: CustomText(
-                  'Clock Out',
+                  buttonText,
                   size: 14,
                   weight: FontWeight.w700,
                   color: ColorResource.white,
