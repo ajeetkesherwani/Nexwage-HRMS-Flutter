@@ -16,18 +16,19 @@ android {
         versionName = "1.0.0"
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file("/Users/apple/StudioProjects/nexwage/android/app/nexWage.jks")
-            storePassword = "nex123"
-            keyAlias = "nexWage"
-            keyPassword = "nex123"
-        }
-    }
+//    signingConfigs {
+//        create("release") {
+//            storeFile = file("/Users/apple/StudioProjects/nexwage/android/app/nexWage.jks")
+//            storePassword = "nex123"
+//            keyAlias = "nexWage"
+//            keyPassword = "nex123"
+//        }
+//    }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            //signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             multiDexEnabled = true

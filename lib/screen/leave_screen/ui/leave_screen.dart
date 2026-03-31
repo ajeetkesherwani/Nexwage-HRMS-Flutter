@@ -8,8 +8,9 @@ import 'package:nexwage/widget/customImageView.dart';
 import 'package:nexwage/widget/custom_text.dart';
 import 'package:nexwage/widget/navigator_method.dart';
 import 'package:provider/provider.dart';
-import '../model/recentLeaveModel.dart';
+import '../model/leaveModel.dart';
 import 'apply_for_leave.dart';
+import 'package:intl/intl.dart';
 class LeaveScreen extends StatefulWidget {
   const LeaveScreen({super.key});
 
@@ -23,40 +24,17 @@ class _LeaveScreenState extends State<LeaveScreen> {
     super.initState();
     Future.microtask(() {
       Provider.of<LeaveProvider>(context, listen: false).getLeaveData();
+      Provider.of<LeaveProvider>(context, listen: false).getwithdrawnData( id: '');
     });
   }
-  //
-  List<RecentLeaveModel> recentLeaveList = [
-    RecentLeaveModel(
-      type: 'ANNUAL LEAVE',
-      dateRange: '12 Oct - 15 Oct',
-      days: '4 Days',
-      appliedOn: '01 Oct',
-      status: 'APPROVED',
-      approvedBy: 'Sarah Sharma',
-    ),
-    RecentLeaveModel(
-      type: 'SICK LEAVE',
-      dateRange: '20 Oct - 21 Oct',
-      days: '2 Days',
-      appliedOn: '18 Oct',
-      status: 'PENDING',
-      note: 'Waiting for approval from HR Dept.',
-    ),
-    RecentLeaveModel(
-      type: 'CASUAL LEAVE',
-      dateRange: '05 Oct - 06 Oct',
-      days: '2 Days',
-      appliedOn: '28 Sep',
-      status: 'REJECTED',
-    ),
-  ];
+
 
   @override
   Widget build(BuildContext context) {
     return Consumer<LeaveProvider>(
         builder: (context, leaveProvider, child) {
           final leaveList = leaveProvider.getLeaveModel?.leaveSummary;
+          final leaveRequestList = leaveProvider.getLeaveModel?.leaveRequests;
           return  SafeArea(
               top: false,
               child: Scaffold(
@@ -113,13 +91,16 @@ class _LeaveScreenState extends State<LeaveScreen> {
                         ),
                       ),
                       SizedBox(height: 20,),
-                      CommonAppButton(
-                        text:'Apply Leave',
-                        backgroundColor1: ColorResource.button1,
-                        backgroundColor2: ColorResource.button1,
-                        onPressed: (){
-                          navPush(context: context, action: ApplyForLeaveScreen());
-                        },image: AppImages.plus,),
+                      SizedBox(
+                        height: 40,
+                        child: CommonAppButton(
+                          text:'Apply Leave',
+                          backgroundColor1: ColorResource.button1,
+                          backgroundColor2: ColorResource.button1,
+                          onPressed: (){
+                            navPush(context: context, action: ApplyForLeaveScreen());
+                          },image: AppImages.plus,),
+                      ),
                       SizedBox(height: 10,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,18 +120,22 @@ class _LeaveScreenState extends State<LeaveScreen> {
                         ],
                       ),
                       SizedBox(height: 10,),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: recentLeaveList.length,
-                          itemBuilder: (context, index) {
-                            final data = recentLeaveList[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: recentApplicationCard(data),
-                            );
-                          },
-                        ),
-                      )
+
+
+                  Expanded(
+                    child: (leaveRequestList == null || leaveRequestList.isEmpty)
+                        ? const Center(child: Text("No leave requests"))
+                        : ListView.builder(
+                      itemCount: leaveRequestList.length,
+                      itemBuilder: (context, index) {
+                        final request = leaveRequestList[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: recentApplicationCard(request),
+                        );
+                      },
+                    ),
+                  )
                     ],
                   ),
                 ),
@@ -161,11 +146,13 @@ class _LeaveScreenState extends State<LeaveScreen> {
 
 
   }
-  Widget recentApplicationCard(RecentLeaveModel data) {
+
+
+  Widget recentApplicationCard(LeaveRequests requestLeave) {
     Color statusColor;
     Color statusBg;
 
-    switch (data.status) {
+    switch (requestLeave.status) {
       case 'APPROVED':
         statusColor = ColorResource.green;
         statusBg = ColorResource.greenBackground;
@@ -183,6 +170,24 @@ class _LeaveScreenState extends State<LeaveScreen> {
         statusBg = Colors.grey.shade200;
     }
 
+    int days = 0;
+    String appliedDate = "";
+
+    try {
+      if (requestLeave.fromDate != null && requestLeave.toDate != null) {
+        final from = DateTime.parse(requestLeave.fromDate!);
+        final to = DateTime.parse(requestLeave.toDate!);
+        days = to.difference(from).inDays + 1;
+      }
+
+      if (requestLeave.appliedOn != null) {
+        final applied = DateTime.parse(requestLeave.appliedOn!);
+        appliedDate = DateFormat('dd MMM').format(applied);
+      }
+    } catch (e) {
+      days = 0;
+      appliedDate = "";
+    }
     return Container(
       padding: EdgeInsets.all(15),
       decoration: ShapeDecoration(
@@ -203,12 +208,11 @@ class _LeaveScreenState extends State<LeaveScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          /// Top Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CustomText(
-                data.type,
+                requestLeave.leaveTypeName ?? "",
                 size: 12,
                 weight: FontWeight.w600,
                 color: statusColor,
@@ -220,7 +224,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                   color: statusBg,
                 ),
                 child: CustomText(
-                  data.status,
+                  requestLeave.status ?? "",
                   size: 10,
                   weight: FontWeight.w700,
                   color: statusColor,
@@ -230,55 +234,70 @@ class _LeaveScreenState extends State<LeaveScreen> {
           ),
 
           SizedBox(height: 10),
-
-          /// Date
           CustomText(
-            data.dateRange,
+
+            '${requestLeave.fromDate ?? ""} ${requestLeave.toDate ?? ""}',
             size: 16,
             weight: FontWeight.w700,
             color: ColorResource.black,
           ),
-
-          /// Days + Applied
+          
           CustomText(
-            '${data.days} • Applied on ${data.appliedOn}',
+            '$days Days • Applied on $appliedDate',
             size: 12,
             weight: FontWeight.w400,
             color: ColorResource.gray,
           ),
 
           SizedBox(height: 10),
-
-          /// Bottom Section
-          if (data.status == 'APPROVED')
+         // if (requestLeave.status == 'APPROVED')
+          if (requestLeave.status == 'Pending')
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CustomText(
-                  'Approved by ${data.approvedBy}',
-                  size: 12,
-                  weight: FontWeight.w400,
-                  color: ColorResource.gray,
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        color: ColorResource.searchBar
+                      ),child: Icon(Icons.person),
+                    ),
+                    SizedBox(width: 5,),
+                    CustomText(
+                      'Approved by ${requestLeave.status}',
+                      size: 12,
+                      weight: FontWeight.w400,
+                      color: ColorResource.gray,
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: ColorResource.red),
-                  ),
-                  child: CustomText(
-                    'Withdraw',
-                    size: 12,
-                    weight: FontWeight.w700,
-                    color: ColorResource.red,
+                GestureDetector(
+                  onTap: (){
+                    Provider.of<LeaveProvider>(context, listen: false).getwithdrawnData( id: requestLeave.leaveRequestId.toString());
+                    print(requestLeave.leaveRequestId.toString());
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: ColorResource.red),
+                    ),
+                    child: CustomText(
+                      'Withdraw',
+                      size: 12,
+                      weight: FontWeight.w700,
+                      color: ColorResource.red,
+                    ),
                   ),
                 )
               ],
             ),
 
-          if (data.status == 'PENDING')
+          if (requestLeave.status == 'Pending')
             CustomText(
-              data.note ?? '',
+              requestLeave.reason ?? '',
               size: 12,
               weight: FontWeight.w400,
               color: ColorResource.gray,
@@ -287,6 +306,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
       ),
     );
   }
+
 
   Widget leaveCard({
     required String image,

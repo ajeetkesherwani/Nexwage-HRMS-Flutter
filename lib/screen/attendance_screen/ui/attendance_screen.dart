@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:nexwage/util/color/app_colors.dart';
 import 'package:nexwage/util/image_resource/image_resource.dart';
@@ -10,9 +9,6 @@ import 'package:nexwage/widget/custom_text.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../util/core/attendence_service/attendence_service.dart';
-import '../../../util/core/attendence_service/commontimer_helper.dart';
 import '../../../util/core/device_id/device_service.dart';
 import '../model/today_attendance_model.dart';
 import '../provider/attendance_provider.dart';
@@ -40,13 +36,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   bool isPunchedIn = false;
   Timer? _timer;
   Duration _duration = Duration();
-
   bool _dialogShown = false;
 
   void loadDeviceId() async {
     String id = await DeviceService.getDeviceId();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('deviceId', id); // ✅ SAVE
+    await prefs.setString('deviceId', id);
 
     if (mounted) {
       setState(() {
@@ -65,17 +60,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   void restoreShiftAndTimer() async {
     final prefs = await SharedPreferences.getInstance();
-
     String? shiftStart = prefs.getString('shiftStart');
     String? shiftEnd = prefs.getString('shiftEnd');
     String? punchTimeStr = prefs.getString('punchTime');
-
     if (shiftStart == null || shiftEnd == null || punchTimeStr == null) return;
-
     DateTime punchTime = DateTime.parse(punchTimeStr);
-
     final now = DateTime.now();
-
     if (punchTime.year == now.year &&
         punchTime.month == now.month &&
         punchTime.day == now.day) {
@@ -83,10 +73,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         context,
         listen: false,
       );
-
       attendanceProvider.shiftStart = shiftStart;
       attendanceProvider.shiftEnd = shiftEnd;
-
       setState(() {
         if (now.isBefore(punchTime)) {
           _duration = Duration.zero;
@@ -107,10 +95,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       final parts = time.split(":");
       int hour = int.parse(parts[0]);
       int minute = int.parse(parts[1]);
-
       String period = hour >= 12 ? "PM" : "AM";
       hour = hour % 12 == 0 ? 12 : hour % 12;
-
       return "$hour:${minute.toString().padLeft(2, '0')} $period";
     } catch (e) {
       return time;
@@ -127,9 +113,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         isPunchedIn = true;
       });
       final now = DateTime.now();
-
       final startParts = startTime.split(":");
-
       final startDateTime = DateTime(
         now.year,
         now.month,
@@ -137,14 +121,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         int.parse(startParts[0]),
         int.parse(startParts[1]),
       );
-
       _timer?.cancel();
-
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;
-
         final currentTime = DateTime.now();
-
         setState(() {
           if (currentTime.isBefore(startDateTime)) {
             _duration = Duration.zero;
@@ -167,9 +147,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         context,
         listen: false,
       );
-
       Position? position = await getUserLocation();
-
       if (position == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Unable to fetch location")),
@@ -179,14 +157,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
       double latitude = position.latitude;
       double longitude = position.longitude;
-
       final prefs = await SharedPreferences.getInstance();
-
       double officeLat = prefs.getDouble('officeLatitude') ?? 0.0;
       double officeLng = prefs.getDouble('officeLongitude') ?? 0.0;
       double allowedRadius = prefs.getDouble('attendanceRadius') ?? 100;
       bool allowOutside = prefs.getBool('allowOutsideLocation') ?? false;
-
       double distance = Geolocator.distanceBetween(
         latitude,
         longitude,
@@ -198,21 +173,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       debugPrint(" OFFICE LOCATION: $officeLat , $officeLng");
       debugPrint(" DISTANCE: $distance meters");
       debugPrint(" DEVICE ID: $deviceId");
-
       if (!(allowOutside || distance <= allowedRadius)) {
         showOutOfRangeDialog(context, distance);
         return;
       }
-
       final currentTimestamp = await attendanceProvider.getPublicTime();
-
       if (currentTimestamp == null) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("Unable to fetch time")));
         return;
       }
-
       final checkInResponse = await attendanceProvider.PostAttendanceData(
         latitude: latitude,
         longitude: longitude,
@@ -222,22 +193,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
       if (attendanceProvider.error == null) {
         final data = attendanceProvider.postWalletResponse?.data;
-
         if (data != null) {
           final prefs = await SharedPreferences.getInstance();
-
           final shiftStart = checkInResponse?.data!.punchInTime!;
           String shiftEnd = data.shift?.end ?? "18:00";
-
-          // 🔥 Save locally
           await prefs.setString('shiftStart', shiftStart!);
           await prefs.setString('shiftEnd', shiftEnd);
           await prefs.setString('punchTime', currentTimestamp);
-
           attendanceProvider.shiftStart = shiftStart;
           attendanceProvider.shiftEnd = shiftEnd;
-
-          // 🔥 Start timer
           startTimer(shiftStart!);
         }
 
@@ -246,14 +210,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         await prefs.setString('shiftStart', attendanceProvider.startTime!);
         showAlreadyMarkedDialog(context);
       } else {
-        debugPrint("❌ API ERROR: ${attendanceProvider.error}");
+        debugPrint(" API ERROR: ${attendanceProvider.error}");
 
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(attendanceProvider.error!)));
       }
     } catch (e) {
-      debugPrint("🔥 ERROR: $e");
+      debugPrint(" ERROR: $e");
 
       ScaffoldMessenger.of(
         context,
@@ -267,9 +231,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         context,
         listen: false,
       );
-
       Position? position = await getUserLocation();
-
       if (position == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Unable to fetch location")),
@@ -279,14 +241,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
       double latitude = position.latitude;
       double longitude = position.longitude;
-
       final prefs = await SharedPreferences.getInstance();
-
       double officeLat = prefs.getDouble('officeLatitude') ?? 0.0;
       double officeLng = prefs.getDouble('officeLongitude') ?? 0.0;
       double allowedRadius = prefs.getDouble('attendanceRadius') ?? 100;
       bool allowOutside = prefs.getBool('allowOutsideLocation') ?? false;
-
       double distance = Geolocator.distanceBetween(
         latitude,
         longitude,
@@ -298,14 +257,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       debugPrint(" OFFICE LOCATION: $officeLat , $officeLng");
       debugPrint(" DISTANCE: $distance meters");
       debugPrint(" DEVICE ID: $deviceId");
-
       if (!(allowOutside || distance <= allowedRadius)) {
         showOutOfRangeDialog(context, distance);
         return;
       }
-
       final currentTimestamp = await attendanceProvider.getPublicTime();
-
       if (currentTimestamp == null) {
         ScaffoldMessenger.of(
           context,
@@ -318,17 +274,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         longitude: longitude,
         timestamp: currentTimestamp,
       );
-
       if (attendanceProvider.error == null) {
         final data = attendanceProvider.panchOutResponse?.data;
-
         if (data != null) {
           final prefs = await SharedPreferences.getInstance();
-
           final shiftStart = checkInResponse?.data!.punchInTime!;
           String shiftEnd = data.punchOutTime ?? "18:00";
-
-          // 🔥 Save locally
           await prefs.remove('shiftStart');
           await prefs.remove('shiftEnd');
           await prefs.remove('punchTime');
@@ -348,14 +299,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         await prefs.setString('shiftStart', attendanceProvider.startTime!);
         showAlreadyMarkedDialog(context);
       } else {
-        debugPrint("❌ API ERROR: ${attendanceProvider.error}");
+        debugPrint(" API ERROR: ${attendanceProvider.error}");
 
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(attendanceProvider.error!)));
       }
     } catch (e) {
-      debugPrint("🔥 ERROR: $e");
+      debugPrint(" ERROR: $e");
 
       ScaffoldMessenger.of(
         context,
@@ -372,7 +323,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
 
-          /// 🔹 Title
           title: Center(
             child: CustomText(
               "Confirm",
@@ -382,7 +332,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ),
           ),
 
-          /// 🔹 Content
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -401,7 +350,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ],
           ),
 
-          /// 🔹 Buttons
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -460,7 +408,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 🔶 Icon Circle
                 Container(
                   height: 80,
                   width: 80,
@@ -476,8 +423,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
 
                 const SizedBox(height: 20),
-
-                // 🔥 Title
                 Text(
                   "Already Marked",
                   style: TextStyle(
@@ -489,7 +434,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
                 const SizedBox(height: 10),
 
-                // 📝 Message
                 Text(
                   "Your attendance has already been marked for today.",
                   textAlign: TextAlign.center,
@@ -498,7 +442,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
                 const SizedBox(height: 25),
 
-                // ✅ Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -539,7 +482,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
 
-          /// 🔹 Title
           title: Center(
             child: CustomText(
               "Success",
@@ -549,18 +491,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ),
           ),
 
-          /// 🔹 Content
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.logout, // 👈 Punch Out icon
+                Icons.logout,
                 color: Colors.orange,
                 size: 60,
               ),
               SizedBox(height: 10),
               CustomText(
-                "Punch Out Successfully", // 👈 changed text
+                "Punch Out Successfully",
                 size: 13,
                 weight: FontWeight.w400,
                 color: ColorResource.black,
@@ -568,7 +509,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ],
           ),
 
-          /// 🔹 Button
           actions: [
             CommonAppButton(
               text: "OK",
@@ -688,15 +628,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Future<Position?> getUserLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
-
-    // Check if location service is enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       print('Location services are disabled');
       return null;
     }
-
-    // Check permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -711,7 +647,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       return null;
     }
 
-    // Get current location
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
@@ -743,9 +678,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     return Consumer<AttendanceProvider>(
       builder: (context, attendanceProvider, child) {
         final duration = attendanceProvider.duration;
-
         String twoDigits(int n) => n.toString().padLeft(2, '0');
-
         final hours = twoDigits(duration.inHours);
         final minutes = twoDigits(duration.inMinutes.remainder(60));
         final seconds = twoDigits(duration.inSeconds.remainder(60));
@@ -822,7 +755,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         ),
                       ],
                     ),
-                    // CustomText("Device ID: $deviceId"),
                     SizedBox(height: 15),
                     Row(
                       children: [
@@ -907,12 +839,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               weight: FontWeight.w700,
                               color: ColorResource.black,
                             ),
-                            // CustomText(
-                            //   attendanceProvider?.todayAttendanceModel?.data?.sessions?.last.clockOut ?? "",
-                            //   size: 12,
-                            //   weight: FontWeight.w400,
-                            //   color: ColorResource.gray,
-                            // ),
+
                             CustomText(
                               attendanceProvider
                                   ?.todayAttendanceModel
@@ -976,7 +903,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       ),
       child: Column(
         children: [
-          /// WEEK ROW
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: weeklySummary.map((item) {
@@ -996,7 +922,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               return Expanded(
                 child: Column(
                   children: [
-                    /// Day
                     Text(
                       getDay(item.day),
                       style: const TextStyle(
@@ -1008,7 +933,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
                     const SizedBox(height: 8),
 
-                    /// Date Circle
                     Container(
                       height: 40,
                       width: 40,
@@ -1029,7 +953,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
                     const SizedBox(height: 6),
 
-                    /// Status Dot
                     Container(
                       height: 8,
                       width: 8,
@@ -1048,7 +971,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           const Divider(),
           const SizedBox(height: 10),
 
-          /// Legend
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [

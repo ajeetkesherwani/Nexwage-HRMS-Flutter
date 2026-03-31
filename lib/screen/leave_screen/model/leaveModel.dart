@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 class LeaveModel {
   int? employeeId;
   List<LeaveSummary>? leaveSummary;
-  List<String>? leaveRequests;
+  List<LeaveRequests>? leaveRequests;
 
   LeaveModel({this.employeeId, this.leaveSummary, this.leaveRequests});
 
@@ -14,7 +13,12 @@ class LeaveModel {
         leaveSummary!.add(new LeaveSummary.fromJson(v));
       });
     }
-    leaveRequests = json['leave_requests'].cast<String>();
+    if (json['leave_requests'] != null) {
+      leaveRequests = <LeaveRequests>[];
+      json['leave_requests'].forEach((v) {
+        leaveRequests!.add(new LeaveRequests.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -24,7 +28,10 @@ class LeaveModel {
       data['leave_summary'] =
           this.leaveSummary!.map((v) => v.toJson()).toList();
     }
-    data['leave_requests'] = this.leaveRequests;
+    if (this.leaveRequests != null) {
+      data['leave_requests'] =
+          this.leaveRequests!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -62,3 +69,43 @@ class LeaveSummary {
   }
 }
 
+class LeaveRequests {
+  int? leaveRequestId;
+  String? leaveTypeName;
+  String? fromDate;
+  String? toDate;
+  String? appliedOn;
+  String? status;
+  String? reason;
+
+  LeaveRequests(
+      {this.leaveRequestId,
+        this.leaveTypeName,
+        this.fromDate,
+        this.toDate,
+        this.appliedOn,
+        this.status,
+        this.reason});
+
+  LeaveRequests.fromJson(Map<String, dynamic> json) {
+    leaveRequestId = json['leave_request_id'];
+    leaveTypeName = json['leave_type_name'];
+    fromDate = json['from_date'];
+    toDate = json['to_date'];
+    appliedOn = json['applied_on'];
+    status = json['status'];
+    reason = json['reason'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['leave_request_id'] = this.leaveRequestId;
+    data['leave_type_name'] = this.leaveTypeName;
+    data['from_date'] = this.fromDate;
+    data['to_date'] = this.toDate;
+    data['applied_on'] = this.appliedOn;
+    data['status'] = this.status;
+    data['reason'] = this.reason;
+    return data;
+  }
+}

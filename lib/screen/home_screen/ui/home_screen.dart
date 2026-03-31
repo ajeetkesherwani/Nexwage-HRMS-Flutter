@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void loadDeviceId() async {
     String id = await DeviceService.getDeviceId();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('deviceId', id); // ✅ SAVE
+    await prefs.setString('deviceId', id);
 
     if (mounted) {
       setState(() {
@@ -259,7 +259,6 @@ class _HomeScreenState extends State<HomeScreen> {
           final shiftStart = checkInResponse?.data!.punchInTime!;
           String shiftEnd = data.shift?.end ?? "18:00";
 
-          // 🔥 Save locally
           await prefs.setString('shiftStart', shiftStart!);
           await prefs.setString('shiftEnd', shiftEnd);
           await prefs.setString('punchTime', currentTimestamp);
@@ -267,7 +266,6 @@ class _HomeScreenState extends State<HomeScreen> {
           attendanceProvider.shiftStart = shiftStart;
           attendanceProvider.shiftEnd = shiftEnd;
 
-          // 🔥 Start timer
           startTimer(shiftStart!);
         }
 
@@ -276,14 +274,14 @@ class _HomeScreenState extends State<HomeScreen> {
         await prefs.setString('shiftStart', attendanceProvider.startTime!);
         showAlreadyMarkedDialog(context);
       } else {
-        debugPrint("❌ API ERROR: ${attendanceProvider.error}");
+        debugPrint(" API ERROR: ${attendanceProvider.error}");
 
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(attendanceProvider.error!)));
       }
     } catch (e) {
-      debugPrint("🔥 ERROR: $e");
+      debugPrint(" ERROR: $e");
 
       ScaffoldMessenger.of(
         context,
@@ -351,18 +349,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (attendanceProvider.error == null) {
         final data = attendanceProvider.panchOutResponse?.data;
-
         if (data != null) {
           final prefs = await SharedPreferences.getInstance();
-
           final shiftStart = checkInResponse?.data!.punchInTime!;
           String shiftEnd = data.punchOutTime ?? "18:00";
-
-          // 🔥 Save locally
           await prefs.remove('shiftStart');
           await prefs.remove('shiftEnd');
           await prefs.remove('punchTime');
-
           attendanceProvider.shiftStart = shiftStart;
           attendanceProvider.shiftEnd = shiftEnd;
         }
@@ -378,14 +371,14 @@ class _HomeScreenState extends State<HomeScreen> {
         await prefs.setString('shiftStart', attendanceProvider.startTime!);
         showAlreadyMarkedDialog(context);
       } else {
-        debugPrint("❌ API ERROR: ${attendanceProvider.error}");
+        debugPrint(" API ERROR: ${attendanceProvider.error}");
 
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(attendanceProvider.error!)));
       }
     } catch (e) {
-      debugPrint("🔥 ERROR: $e");
+      debugPrint(" ERROR: $e");
 
       ScaffoldMessenger.of(
         context,
@@ -403,7 +396,6 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
 
-          /// 🔹 Title
           title: Center(
             child: CustomText(
               "Confirm",
@@ -413,7 +405,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          /// 🔹 Content
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -432,7 +423,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
 
-          /// 🔹 Buttons
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -454,9 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor1: ColorResource.button1,
                     backgroundColor2: ColorResource.button1,
                     onPressed: () {
-                      Navigator.pop(context); // close confirm
-
-                      /// 👉 Call success dialog
+                      Navigator.pop(context);
                       showPunchOutSuccessDialog(context);
                     },
                   ),
@@ -478,7 +466,6 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
 
-          /// 🔹 Title
           title: Center(
             child: CustomText(
               "Success",
@@ -488,18 +475,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          /// 🔹 Content
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.logout, // 👈 Punch Out icon
+                Icons.logout,
                 color: Colors.orange,
                 size: 60,
               ),
               SizedBox(height: 10),
               CustomText(
-                "Punch Out Successfully", // 👈 changed text
+                "Punch Out Successfully",
                 size: 13,
                 weight: FontWeight.w400,
                 color: ColorResource.black,
@@ -507,7 +493,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
 
-          /// 🔹 Button
           actions: [
             CommonAppButton(
               text: "OK",
@@ -627,15 +612,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<Position?> getUserLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
-
-    // Check if location service is enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       print('Location services are disabled');
       return null;
     }
-
-    // Check permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -649,8 +630,6 @@ class _HomeScreenState extends State<HomeScreen> {
       print('Location permission permanently denied');
       return null;
     }
-
-    // Get current location
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
@@ -667,7 +646,7 @@ class _HomeScreenState extends State<HomeScreen> {
       barrierDismissible: false,
       builder: (context) {
         return WillPopScope(
-          onWillPop: () async => false, // ❌ disable back button
+          onWillPop: () async => false,
           child: Dialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -678,7 +657,6 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 🔥 ICON
                   Container(
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
@@ -691,10 +669,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.blue,
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
-                  // 🧠 TITLE
                   Text(
                     forceUpdate ? "Update Required" : "Update Available",
                     style: const TextStyle(
@@ -704,8 +679,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   const SizedBox(height: 10),
-
-                  // 💬 MESSAGE
                   Text(
                     message,
                     textAlign: TextAlign.center,
@@ -714,10 +687,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 25),
 
-                  // 🔘 BUTTONS
                   Column(
                     children: [
-                      // 🚀 UPDATE BUTTON
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -725,7 +696,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             final url = Uri.parse(
                               "https://play.google.com/store/apps/details?id=com.hrms.nexwage",
                             );
-
                             if (await canLaunchUrl(url)) {
                               await launchUrl(
                                 url,
@@ -747,14 +717,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      // ❗ LATER BUTTON (ONLY IF NOT FORCE)
                       if (!forceUpdate) ...[
                         const SizedBox(height: 10),
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton(
                             onPressed: () {
-                              // ❌ CLOSE APP
                               if (Platform.isAndroid) {
                                 SystemNavigator.pop();
                               } else {
@@ -792,7 +760,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentVersion = await appProvider.getCurrentVersion();
       } catch (e) {
         print("Fallback version used");
-        currentVersion = "1.0.0"; // fallback
+        currentVersion = "1.0.0";
       }
 
       String apiVersion = appProvider.appVersionModel?.data?.version ?? "1.0.0";
@@ -838,7 +806,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 🔶 Icon Circle
                 Container(
                   height: 80,
                   width: 80,
@@ -855,7 +822,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 20),
 
-                // 🔥 Title
                 Text(
                   "Already Marked",
                   style: TextStyle(
@@ -867,7 +833,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 10),
 
-                // 📝 Message
                 Text(
                   "Your attendance has already been marked for today.",
                   textAlign: TextAlign.center,
@@ -876,7 +841,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 25),
 
-                // ✅ Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -907,17 +871,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ✅ SAFE VERSION COMPARE
   bool isUpdateRequired(String currentVersion, String apiVersion) {
     List<int> current = currentVersion.split('.').map(int.parse).toList();
     List<int> api = apiVersion.split('.').map(int.parse).toList();
-
     int maxLength = current.length > api.length ? current.length : api.length;
-
     for (int i = 0; i < maxLength; i++) {
       int c = i < current.length ? current[i] : 0;
       int a = i < api.length ? api[i] : 0;
-
       if (a > c) return true;
       if (a < c) return false;
     }
@@ -954,7 +914,6 @@ class _HomeScreenState extends State<HomeScreen> {
               body: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// 🔵 HEADER WITH OVERLAP CARD
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -977,8 +936,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 60),
-
-                            /// 👤 PROFILE ROW
                             Row(
                               children: [
                                 GestureDetector(
@@ -1011,7 +968,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           CustomText(
-                                            //'Good Morning',
                                             getGreeting(),
                                             size: 12,
                                             weight: FontWeight.w400,
@@ -1023,7 +979,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ?.data
                                                     ?.fullName ??
                                                 "",
-                                            //'Daman Singh',
                                             size: 16,
                                             weight: FontWeight.w600,
                                             color: ColorResource.white,
@@ -1223,7 +1178,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      /// ⚪ OVERLAP CARD
                     ],
                   ),
                   const SizedBox(height: 40),
