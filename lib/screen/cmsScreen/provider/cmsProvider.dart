@@ -9,7 +9,7 @@ class CmsProvider with ChangeNotifier {
   bool loading = false;
   CmsModel? getCmsData;
 
-  Future<void> fetchCmsData() async {
+  Future<void> fetchCmsData({bool isRefresh = false}) async {
     loading = true;
     notifyListeners();
     try {

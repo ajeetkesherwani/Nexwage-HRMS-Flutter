@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:nexwage/screen/home_screen/ui/dailBox/showPunchOutConfirmDialog.dart';
 import 'package:nexwage/util/color/app_colors.dart';
 import 'package:nexwage/util/image_resource/image_resource.dart';
 import 'package:nexwage/widget/commonAppBar.dart';
-import 'package:nexwage/widget/commonAppButton.dart';
 import 'package:nexwage/widget/customImageView.dart';
 import 'package:nexwage/widget/custom_text.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,17 +26,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     super.initState();
     loadDeviceId();
     restoreShiftAndTimer();
-    Provider.of<AttendanceProvider>(
-      context,
-      listen: false,
-    ).getTodayAttendanceDate();
+    Provider.of<AttendanceProvider>(context, listen: false,).getTodayAttendanceDate();
   }
 
   String deviceId = "";
   bool isPunchedIn = false;
   Timer? _timer;
   Duration _duration = Duration();
-  bool _dialogShown = false;
 
   void loadDeviceId() async {
     String id = await DeviceService.getDeviceId();
@@ -174,7 +170,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       debugPrint(" DISTANCE: $distance meters");
       debugPrint(" DEVICE ID: $deviceId");
       if (!(allowOutside || distance <= allowedRadius)) {
-        showOutOfRangeDialog(context, distance);
+        ShowDailBox.showOutOfRangeDialog(context, distance);
         return;
       }
       final currentTimestamp = await attendanceProvider.getPublicTime();
@@ -205,10 +201,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           startTimer(shiftStart!);
         }
 
-        showAttendanceSuccessDialog(context);
+        ShowDailBox.showAttendanceSuccessDialog(context);
       } else if (attendanceProvider.error!.toLowerCase().contains("already")) {
         await prefs.setString('shiftStart', attendanceProvider.startTime!);
-        showAlreadyMarkedDialog(context);
+        ShowDailBox.showAlreadyMarkedDialog(context);
       } else {
         debugPrint(" API ERROR: ${attendanceProvider.error}");
 
@@ -258,7 +254,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       debugPrint(" DISTANCE: $distance meters");
       debugPrint(" DEVICE ID: $deviceId");
       if (!(allowOutside || distance <= allowedRadius)) {
-        showOutOfRangeDialog(context, distance);
+        ShowDailBox.showOutOfRangeDialog(context, distance);
         return;
       }
       final currentTimestamp = await attendanceProvider.getPublicTime();
@@ -289,7 +285,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         }
 
        // showPunchOutSuccessDialog(context);
-        showPunchOutConfirmDialog(context);
+        ShowDailBox.showPunchOutConfirmDialog(context);
         setState(() {
           isPunchedIn = false;
           _timer?.cancel();
@@ -297,7 +293,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         });
       } else if (attendanceProvider.error!.toLowerCase().contains("already")) {
         await prefs.setString('shiftStart', attendanceProvider.startTime!);
-        showAlreadyMarkedDialog(context);
+        ShowDailBox.showAlreadyMarkedDialog(context);
       } else {
         debugPrint(" API ERROR: ${attendanceProvider.error}");
 
@@ -312,317 +308,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text("Something went wrong")));
     }
-  }
-  void showPunchOutConfirmDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-
-          title: Center(
-            child: CustomText(
-              "Confirm",
-              size: 18,
-              weight: FontWeight.w700,
-              color: ColorResource.black,
-            ),
-          ),
-
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.help_outline,
-                color: Colors.orange,
-                size: 60,
-              ),
-              SizedBox(height: 10),
-              CustomText(
-                "Are you sure you want to Punch Out?",
-                size: 13,
-                weight: FontWeight.w400,
-                color: ColorResource.black,
-              ),
-            ],
-          ),
-
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: CommonAppButton(
-                    text: "No",
-                    backgroundColor1: Colors.grey,
-                    backgroundColor2: Colors.grey,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: CommonAppButton(
-                    text: "Yes",
-                    backgroundColor1: ColorResource.button1,
-                    backgroundColor2: ColorResource.button1,
-                    onPressed: () {
-                      Navigator.pop(context); // close confirm
-
-                      /// 👉 Call success dialog
-                      showPunchOutSuccessDialog(context);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-  void showAlreadyMarkedDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 80,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.info_outline,
-                    color: Colors.orange,
-                    size: 40,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-                Text(
-                  "Already Marked",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  "Your attendance has already been marked for today.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                ),
-
-                const SizedBox(height: 25),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Colors.orange,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      "OK",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void showPunchOutSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-
-          title: Center(
-            child: CustomText(
-              "Success",
-              size: 18,
-              weight: FontWeight.w700,
-              color: ColorResource.black,
-            ),
-          ),
-
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.logout,
-                color: Colors.orange,
-                size: 60,
-              ),
-              SizedBox(height: 10),
-              CustomText(
-                "Punch Out Successfully",
-                size: 13,
-                weight: FontWeight.w400,
-                color: ColorResource.black,
-              ),
-            ],
-          ),
-
-          actions: [
-            CommonAppButton(
-              text: "OK",
-              backgroundColor1: ColorResource.button1,
-              backgroundColor2: ColorResource.button1,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showAttendanceSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Center(
-            child: CustomText(
-              "Success",
-              size: 18,
-              weight: FontWeight.w700,
-              color: ColorResource.black,
-            ),
-          ),
-
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 60),
-              SizedBox(height: 10),
-              CustomText(
-                "Attendance Marked Successfully",
-                size: 13,
-                weight: FontWeight.w400,
-                color: ColorResource.black,
-              ),
-            ],
-          ),
-          actions: [
-            CommonAppButton(
-              text: "OK",
-              backgroundColor1: ColorResource.button1,
-              backgroundColor2: ColorResource.button1,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showOutOfRangeDialog(BuildContext context, double distance) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
-
-                const SizedBox(height: 20),
-
-                CustomText(
-                  'Out of Range',
-                  size: 20,
-                  weight: FontWeight.w700,
-                  color: ColorResource.black,
-                ),
-
-                const SizedBox(height: 10),
-
-                CustomText(
-                  "You are ${distance.toStringAsFixed(0)}m away from the office premises. Please move closer to clock in.",
-                  size: 14,
-                  weight: FontWeight.w400,
-                  color: ColorResource.gray,
-                  align: TextAlign.center,
-                ),
-
-                const SizedBox(height: 25),
-
-                CommonAppButton(
-                  text: 'Try Again',
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  backgroundColor1: ColorResource.button1,
-                  backgroundColor2: ColorResource.button1,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<Position?> getUserLocation() async {
@@ -641,16 +326,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         return null;
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       print('Location permission permanently denied');
       return null;
     }
-
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
-
     return position;
   }
 
@@ -671,222 +353,229 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (date == null) return "";
     return DateTime.parse(date).day.toString();
   }
+  bool isRefreshing = false;
+  Future<void> _handleRefresh() async {
+    setState(() {
+      isRefreshing = true;
+    });
 
+    await Provider.of<AttendanceProvider>(context, listen: false)
+        .getTodayAttendanceDate(isRefresh: true);
+
+    setState(() {
+      isRefreshing = false;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     restoreShiftAndTimer();
     return Consumer<AttendanceProvider>(
       builder: (context, attendanceProvider, child) {
-        final duration = attendanceProvider.duration;
-        String twoDigits(int n) => n.toString().padLeft(2, '0');
-        final hours = twoDigits(duration.inHours);
-        final minutes = twoDigits(duration.inMinutes.remainder(60));
-        final seconds = twoDigits(duration.inSeconds.remainder(60));
+        // final duration = attendanceProvider.duration;
+        // String twoDigits(int n) => n.toString().padLeft(2, '0');
+        // final hours = twoDigits(duration.inHours);
+        // final minutes = twoDigits(duration.inMinutes.remainder(60));
+        // final seconds = twoDigits(duration.inSeconds.remainder(60));
         return SafeArea(
+          top: false,
+
           child: Scaffold(
             appBar: CommonAppBar(title: 'Attendance', isBack: false),
             backgroundColor: ColorResource.white,
-            body: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 10),
-                    Center(
-                      child: Container(
-                        height: 160,
-                        width: 160,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 7,
-                            color: ColorResource.button1,
+            body: Stack(
+              children: [
+                RefreshIndicator(
+                  onRefresh: _handleRefresh,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 10),
+                          Center(
+                            child: Container(
+                              height: 160,
+                              width: 160,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  width: 7,
+                                  color: ColorResource.button1,
+                                ),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  CustomText(
+                                    timerText,
+                                    size: 25,
+                                    weight: FontWeight.w700,
+                                    color: ColorResource.black,
+                                  ),
+                                  CustomText(
+                                    'TOTAL HOURS TODAY',
+                                    size: 10,
+                                    weight: FontWeight.w400,
+                                    color: ColorResource.grayText,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            CustomText(
-                              timerText,
-                              size: 25,
-                              weight: FontWeight.w700,
-                              color: ColorResource.black,
-                            ),
-                            CustomText(
-                              'TOTAL HOURS TODAY',
-                              size: 10,
-                              weight: FontWeight.w400,
-                              color: ColorResource.grayText,
-                            ),
-                          ],
-                        ),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              checkInCard(
+                                image: AppImages.checkIn,
+                                title: 'Clock In',
+                                subTitle: formatTime(
+                                  attendanceProvider.shiftStart ?? "09:00",
+                                ),
+                                backgroundColor: ColorResource.white,
+                                subtitleColor: ColorResource.grayText,
+                                titleColor: ColorResource.black,
+                                onTap: () {
+                                  getLocationData(context);
+                                },
+                              ),
+                              checkInCard(
+                                image: AppImages.checkOut,
+                                title: 'Clock Out',
+                                subTitle: 'End Shift',
+                                backgroundColor: ColorResource.button1,
+                                subtitleColor: ColorResource.white,
+                                titleColor: ColorResource.white,
+                                onTap: () {
+                                  punchOut(context);
+                                },
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                color: ColorResource.button1,
+                                size: 15,
+                              ),
+                              SizedBox(width: 2),
+                              CustomText(
+                                'Office Premises • Tech Park Entrance',
+                                size: 12,
+                                weight: FontWeight.w400,
+                                color: ColorResource.button1,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              CustomText(
+                                "Today's Timeline",
+                                size: 16,
+                                weight: FontWeight.w700,
+                                color: ColorResource.black,
+                              ),
+                              CustomText(
+                                'View All',
+                                size: 12,
+                                weight: FontWeight.w600,
+                                color: ColorResource.button1,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Column(
+                                children: [
+                                  CustomImageView(
+                                    imagePath: AppImages.clockInImage,
+                                    height: 40,
+                                    width: 40,
+                                  ),
+                                  SizedBox(
+                                    height: 25,
+                                    child: VerticalDivider(
+                                      thickness: 1,
+                                      color: ColorResource.searchBar,
+                                    ),
+                                  ),
+                                  CustomImageView(
+                                    imagePath: AppImages.checkOutImage,
+                                    height: 40,
+                                    width: 40,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 15),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                    'Clock In',
+                                    size: 14,
+                                    weight: FontWeight.w700,
+                                    color: ColorResource.black,
+                                  ),
+                                  CustomText(
+                                    formatTime(attendanceProvider.shiftStart ?? "09:00",),
+                                    size: 12,
+                                    weight: FontWeight.w400,
+                                    color: ColorResource.gray,
+                                  ),
+                                  SizedBox(height: 25),
+                                  CustomText(
+                                    'Clock Out',
+                                    size: 14,
+                                    weight: FontWeight.w700,
+                                    color: ColorResource.black,
+                                  ),
+                                  CustomText(
+                                    attendanceProvider?.todayAttendanceModel?.data?.sessions != null &&
+                                        attendanceProvider!.todayAttendanceModel!.data!.sessions!.isNotEmpty
+                                        ? attendanceProvider.todayAttendanceModel!.data!.sessions!.last.clockOut.toString() ?? "" : "—",
+                                    size: 12,
+                                    weight: FontWeight.w400,
+                                    color: ColorResource.gray,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          CustomText(
+                            'October ${DateTime.now().year} Summary',
+                            size: 16,
+                            weight: FontWeight.w700,
+                            color: ColorResource.black,
+                          ),
+                          SizedBox(height: 10),
+                          weeklyCalendar(
+                            attendanceProvider.todayAttendanceModel?.data?.weeklySummary ?? [],
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        checkInCard(
-                          image: AppImages.checkIn,
-                          title: 'Clock In',
-                          subTitle: formatTime(
-                            attendanceProvider.shiftStart ?? "09:00",
-                          ),
-                          backgroundColor: ColorResource.white,
-                          subtitleColor: ColorResource.grayText,
-                          titleColor: ColorResource.black,
-                          onTap: () {
-                            getLocationData(context);
-                          },
-                        ),
-
-                        checkInCard(
-                          image: AppImages.checkOut,
-                          title: 'Clock Out',
-                          subTitle: 'End Shift',
-                          backgroundColor: ColorResource.button1,
-                          subtitleColor: ColorResource.white,
-                          titleColor: ColorResource.white,
-                          onTap: () {
-                            punchOut(context);
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: ColorResource.button1,
-                          size: 15,
-                        ),
-                        SizedBox(width: 2),
-                        CustomText(
-                          'Office Premises • Tech Park Entrance',
-                          size: 12,
-                          weight: FontWeight.w400,
-                          color: ColorResource.button1,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CustomText(
-                          "Today's Timeline",
-                          size: 16,
-                          weight: FontWeight.w700,
-                          color: ColorResource.black,
-                        ),
-                        CustomText(
-                          'View All',
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: ColorResource.button1,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Column(
-                          children: [
-                            CustomImageView(
-                              imagePath: AppImages.clockInImage,
-                              height: 40,
-                              width: 40,
-                            ),
-                            SizedBox(
-                              height: 25,
-                              child: VerticalDivider(
-                                thickness: 1,
-                                color: ColorResource.searchBar,
-                              ),
-                            ),
-                            CustomImageView(
-                              imagePath: AppImages.checkOutImage,
-                              height: 40,
-                              width: 40,
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: 15),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CustomText(
-                              'Clock In',
-                              size: 14,
-                              weight: FontWeight.w700,
-                              color: ColorResource.black,
-                            ),
-                            CustomText(
-                              formatTime(
-                                attendanceProvider.shiftStart ?? "09:00",
-                              ),
-                              size: 12,
-                              weight: FontWeight.w400,
-                              color: ColorResource.gray,
-                            ),
-                            SizedBox(height: 25),
-                            CustomText(
-                              'Clock Out',
-                              size: 14,
-                              weight: FontWeight.w700,
-                              color: ColorResource.black,
-                            ),
-
-                            CustomText(
-                              attendanceProvider
-                                  ?.todayAttendanceModel
-                                  ?.data
-                                  ?.sessions !=
-                                  null &&
-                                  attendanceProvider!
-                                      .todayAttendanceModel!
-                                      .data!
-                                      .sessions!
-                                      .isNotEmpty
-                                  ? attendanceProvider
-                                  .todayAttendanceModel!
-                                  .data!
-                                  .sessions!
-                                  .last
-                                  .clockOut
-                                  .toString() ??
-                                  ""
-                                  : "—",
-                              size: 12,
-                              weight: FontWeight.w400,
-                              color: ColorResource.gray,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-
-                    CustomText(
-                      'October ${DateTime.now().year} Summary',
-                      size: 16,
-                      weight: FontWeight.w700,
-                      color: ColorResource.black,
-                    ),
-                    SizedBox(height: 10),
-                    weeklyCalendar(
-                      attendanceProvider
-                          .todayAttendanceModel
-                          ?.data
-                          ?.weeklySummary ??
-                          [],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                if (isRefreshing)
+                  const Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Center(child:  LinearProgressIndicator(
+                      color: ColorResource.button1,
+                      minHeight: 2,
+                    )),
+                  ),
+
+              ],
             ),
           ),
         );
@@ -910,15 +599,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               final itemDate = item.date != null
                   ? DateTime.parse(item.date!)
                   : null;
-
               final isToday =
                   itemDate != null &&
                       itemDate.year == today.year &&
                       itemDate.month == today.month &&
                       itemDate.day == today.day;
-
               final color = getStatusColor(item);
-
               return Expanded(
                 child: Column(
                   children: [
@@ -930,9 +616,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-
                     const SizedBox(height: 8),
-
                     Container(
                       height: 40,
                       width: 40,
@@ -950,9 +634,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 6),
-
                     Container(
                       height: 8,
                       width: 8,
@@ -966,11 +648,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               );
             }).toList(),
           ),
-
           const SizedBox(height: 20),
           const Divider(),
           const SizedBox(height: 10),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [

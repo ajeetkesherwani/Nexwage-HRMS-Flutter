@@ -66,8 +66,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
-
                     Row(
                       children: [
                         Icon(Icons.person_2_outlined, color: ColorResource.button1),
@@ -78,8 +76,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                           weight: FontWeight.w600,
                         ),
                         Spacer(),
-
-
                         GestureDetector(
                           onTap: () async {
                             final result = await Navigator.push(
@@ -104,17 +100,13 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         )
                       ],
                     ),
-
                     SizedBox(height: 10),
-
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            //titleCard("Full Name", userData["name"]),
                             titleCard("Full Name", profileProvider.getProfileModel?.data?.fullName ?? ""),
                             titleCard("DOB", profileProvider.getProfileModel?.data?.dateOfBirth ?? ""),
                             titleCard("Marital Status", userData["marital"]),
@@ -130,7 +122,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         ),
                       ],
                     ),
-
                     titleCard("Email", profileProvider.getProfileModel?.data?.email ?? ""),
                     titleCard("Address", userData["address"]),
                   ],
@@ -185,15 +176,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
 
                       ],
                     ),
-
                     const SizedBox(height: 10),
-
-                    // if (emergencyData != null)
-                    //   emergencyCard()
-                    // else
-                    //   CustomText(
-                    //     'No contact added'
-                    //   )
                     if (emergencyList.isNotEmpty)
                       ListView.builder(
                         shrinkWrap: true,
@@ -244,7 +227,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                                   builder: (_) => AddEditSocialScreen(profile: profile),
                                 ),
                               );
-
                               if (updated != null) {
                                 setState(() {
                                   int index = socialProfiles.indexOf(profile);
@@ -274,7 +256,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                             ),
                           );
                         }).toList(),
-
                         SizedBox(width: 10),
                         GestureDetector(
                           onTap: () async {
@@ -699,7 +680,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
           CustomText(title, size: 10, color: ColorResource.gray),
 
           CustomText(
-            (value == null || value.isEmpty) ? "Null" : value,
+            (value == null || value.isEmpty) ? "N/A" : value,
             size: 14,
             weight: FontWeight.w600,
           ),

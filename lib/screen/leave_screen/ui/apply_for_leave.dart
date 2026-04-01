@@ -408,11 +408,12 @@ class _ApplyForLeaveScreenState extends State<ApplyForLeaveScreen> {
                             text: 'Submit Leave Request',
                             backgroundColor1: ColorResource.button1,
                             backgroundColor2: ColorResource.button1,
+                            isLoading: leaveProvider.isLoading ,
                             onPressed: () async {
-                              final provider = Provider.of<LeaveProvider>(context, listen: false);
+                             // final provider = Provider.of<LeaveProvider>(context, listen: false);
 
                               print('buttonStart====${formatDate(startDate!)}');
-                              await provider.applyLeaveData(
+                              await leaveProvider.applyLeaveData(
                                 leave_type_id: leaveProvider.selectedLeaveTypeId.toString(),
                                 start_date: formatDate(startDate!),
                                 end_date: formatDate(endDate!),
@@ -421,11 +422,11 @@ class _ApplyForLeaveScreenState extends State<ApplyForLeaveScreen> {
                                 attachment: _image,
                               );
 
-                              if (provider.loading) {
+                              if (leaveProvider.loading) {
                                 navPush(context: context, action: ApplicationSendScreen());
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text( "Error")),
+                                  SnackBar(content: Text( "Leave Not Send")),
                                 );
                               }
                             }

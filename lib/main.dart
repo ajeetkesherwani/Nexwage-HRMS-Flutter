@@ -9,6 +9,7 @@ import 'package:nexwage/screen/leave_screen/provider/leave_provider.dart';
 import 'package:nexwage/screen/profile/provider/profile_provider.dart';
 import 'package:nexwage/screen/splash/splash_screen.dart';
 import 'package:nexwage/screen/version_update/provider/version_provider.dart';
+import 'package:nexwage/util/color/app_colors.dart';
 import 'package:nexwage/util/core/device_id/device_service.dart';
 import 'package:provider/provider.dart';
 
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Nex Wage',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: ColorResource.button1),
         ),
         home: const SplashScreen(),
       ),

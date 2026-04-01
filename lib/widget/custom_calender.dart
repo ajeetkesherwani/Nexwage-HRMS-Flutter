@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:nexwage/util/color/app_colors.dart';
+import 'package:nexwage/widget/commonAppButton.dart';
 import 'package:table_calendar/table_calendar.dart';
 class CustomCalendarBottomSheet extends StatefulWidget {
   @override
@@ -98,8 +100,6 @@ class _CustomCalendarBottomSheetState
 
 
           Divider(),
-
-          /// FROM - TO
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -124,21 +124,19 @@ class _CustomCalendarBottomSheetState
 
           SizedBox(height: 15),
 
-          /// APPLY BUTTON
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                if (startDate != null && endDate != null) {
-                  Navigator.pop(context, {
-                    "startDate": startDate,
-                    "endDate": endDate,
-                  });
-                }
-              },
-              child: Text("Apply"),
-            ),
-          )
+          CommonAppButton(
+            backgroundColor1: ColorResource.button1,
+              backgroundColor2: ColorResource.button1,
+              text: 'Apply',
+            onPressed: () {
+              if (startDate != null && endDate != null) {
+                Navigator.pop(context, {
+                  "startDate": startDate,
+                  "endDate": endDate,
+                });
+              }
+            },
+          ),
         ],
       ),
     );
@@ -163,7 +161,7 @@ class _CustomCalendarBottomSheetState
     return Container(
       margin: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.2),
+        color: ColorResource.primaryColor,
       ),
       alignment: Alignment.center,
       child: Text("${day.day}"),

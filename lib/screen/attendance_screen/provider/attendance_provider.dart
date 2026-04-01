@@ -49,7 +49,6 @@ class AttendanceProvider with ChangeNotifier {
 
       _postWalletResponse = response;
 
-      // ✅ MAIN FIX HERE
       if (response.status == true) {
         // SUCCESS
         return response;
@@ -100,7 +99,7 @@ class AttendanceProvider with ChangeNotifier {
   bool loading = false;
   TodayAttendanceModel? todayAttendanceModel;
 
-  Future<void> getTodayAttendanceDate() async {
+  Future<void> getTodayAttendanceDate({bool isRefresh = false}) async {
     loading = true;
     notifyListeners();
     try {

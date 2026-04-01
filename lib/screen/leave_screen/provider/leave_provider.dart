@@ -20,7 +20,7 @@ class LeaveProvider with ChangeNotifier {
   bool isLoading = false;
   LeaveModel? getLeaveModel;
 
-  Future<void> getLeaveData() async {
+  Future<void> getLeaveData({bool isRefresh = false}) async {
     loading = true;
     notifyListeners();
     try {
@@ -47,7 +47,7 @@ class LeaveProvider with ChangeNotifier {
   }
 
   WithdrawnModel? getWithdrawnModel;
-  Future<void> getwithdrawnData({required String id}) async {
+  Future<void> getwithdrawnData({required String id,bool isRefresh = false}) async {
     loading = true;
     notifyListeners();
     try {

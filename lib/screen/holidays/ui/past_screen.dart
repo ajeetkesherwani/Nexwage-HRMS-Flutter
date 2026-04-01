@@ -4,6 +4,7 @@ import 'package:nexwage/widget/custom_text.dart';
 import 'package:provider/provider.dart';
 import '../provider/holiday_provider.dart';
 import 'package:intl/intl.dart';
+
 class PastScreen extends StatefulWidget {
   const PastScreen({super.key});
 
@@ -15,7 +16,6 @@ class _PastScreenState extends State<PastScreen> {
   @override
   void initState() {
     super.initState();
-
     Future.microtask(() {
       Provider.of<HoliDayProvider>(context, listen: false)
           .getProfileData();
@@ -30,8 +30,6 @@ class _PastScreenState extends State<PastScreen> {
         final upcomingList = holiDayProvider.holidayModel?.data?.past ?? [];
         final date = DateTime.tryParse(holiDayProvider.holidayModel?.data?.upcoming?[0].startDate ?? "");
         final year = date != null ? DateFormat('yyyy').format(date) : "";
-
-
         return SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -44,8 +42,6 @@ class _PastScreenState extends State<PastScreen> {
                   color: ColorResource.grayText,
                 ),
                 const SizedBox(height: 10),
-
-                /// ✅ Handle empty state
                 if (upcomingList.isEmpty)
                   const Center(
                     child: Padding(
@@ -65,18 +61,14 @@ class _PastScreenState extends State<PastScreen> {
                       final dayNumber = date != null ? DateFormat('d').format(date) : "";
                       final dayName = date != null ? DateFormat('EEEE').format(date) : "";
                       final monthName = date != null ? DateFormat('MMM').format(date) : "";
-
-
                       final endDate = DateTime.tryParse(holiday.endDate ?? "");
                       final endDayNumber = endDate != null ? DateFormat('d').format(endDate) : "";
                       final endDayName = endDate != null ? DateFormat('EEEE').format(endDate) : "";
                       final endMonthName = endDate != null ? DateFormat('MMM').format(endDate) : "";
-
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Row(
                           children: [
-                            /// ✅ Left Box
                             Container(
                               width: 90,
                               height: 60,
@@ -88,8 +80,6 @@ class _PastScreenState extends State<PastScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-
-                                  /// 👉 Start Date
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -97,29 +87,25 @@ class _PastScreenState extends State<PastScreen> {
                                         dayNumber,
                                         size: 18,
                                         weight: FontWeight.w700,
-                                        color: ColorResource.black,
+                                        color: ColorResource.orange,
                                       ),
                                       CustomText(
                                         monthName,
                                         size: 10,
                                         weight: FontWeight.w700,
-                                        color: ColorResource.black,
+                                        color: ColorResource.orange,
                                       ),
                                     ],
                                   ),
-
-                                  /// 👉 Dash
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 2),
                                     child: CustomText(
                                       "-",
                                       size: 16,
                                       weight: FontWeight.w700,
-                                      color: ColorResource.black,
+                                      color: ColorResource.orange,
                                     ),
                                   ),
-
-                                  /// 👉 End Date
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -127,23 +113,20 @@ class _PastScreenState extends State<PastScreen> {
                                         endDayNumber,
                                         size: 18,
                                         weight: FontWeight.w700,
-                                        color: ColorResource.black,
+                                        color: ColorResource.orange,
                                       ),
                                       CustomText(
                                         endMonthName,
                                         size: 10,
                                         weight: FontWeight.w700,
-                                        color: ColorResource.black,
+                                        color: ColorResource.orange,
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
                             ),
-
                             const SizedBox(width: 12),
-
-                            /// ✅ Card
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.symmetric(

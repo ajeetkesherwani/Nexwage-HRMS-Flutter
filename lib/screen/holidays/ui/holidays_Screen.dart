@@ -7,14 +7,12 @@ import '../../../widget/custom_text.dart';
 
 class HolidaysScreen extends StatefulWidget {
   const HolidaysScreen({super.key});
-
   @override
   State<HolidaysScreen> createState() => _HolidaysScreenState();
 }
 
 class _HolidaysScreenState extends State<HolidaysScreen> {
   int selectedTab = 0;
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -27,8 +25,6 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              /// Tabs
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
@@ -64,7 +60,6 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                         ),
                       ),
                     ),
-
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
@@ -95,10 +90,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              /// ✅ IMPORTANT FIX
               Expanded(
                 child: selectedTab == 0
                     ? const UpComingScreen()

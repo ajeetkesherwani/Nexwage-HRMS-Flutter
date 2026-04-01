@@ -35,10 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? profileImage;
 
   Future<void> openEditProfile() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ProfileImageEdit()),
-    );
+    final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileImageEdit()),);
 
     if (result != null) {
       setState(() {
@@ -52,9 +49,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
   int selectedTab = 0;
-
+  bool isRefreshing = false;
   final List<String> tabs = ["General", "Salary", "Core HR"];
+  Future<void> _handleRefresh() async {
+    setState(() {
+      isRefreshing = true;
+    });
 
+    await Provider.of<ProfileProvider>(context, listen: false)
+        .getProfileData(isRefresh: true);
+
+    setState(() {
+      isRefreshing = false;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer<ProfileProvider>(
@@ -70,143 +78,168 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
               backgroundColor: ColorResource.white,
-              body: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Center(
-                        child: Stack(
-                          children: [
-                            Container(
-                              width: 128,
-                              height: 128,
-                              decoration: ShapeDecoration(
-                                image: profileImage != null
-                                    ? DecorationImage(
-                                  image: FileImage(profileImage!),
-                                  fit: BoxFit.cover,
-                                )
-                                    : null,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                    width: 4,
-                                    color: const Color(0x191D4FD7),
-                                  ),
-                                  borderRadius: BorderRadius.circular(9999),
-                                ),
-                              ),
+              body:
 
-                              child: profileImage == null
-                                  ? Icon(Icons.person, size: 60, color: Colors.grey)
-                                  : null,
-                            ),
 
-                            Positioned(
-                              bottom: 4,
-                              right: 4,
-                              child: GestureDetector(
-                                onTap: openEditProfile,
-                                child: Container(
-                                  padding: EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: ColorResource.button1,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      CustomText(
-                        profileProvider.getProfileModel?.data?.fullName ?? "",
-                      //  name ?? "Your Name",
-                        size: 18,
-                        weight: FontWeight.w700,
-                        color: ColorResource.black,
-                      ),
-                      CustomText(
-                        "SENIOR  MANAGER",
-                        //title ?? "Your Title",
-                        size: 14,
-                        weight: FontWeight.w600,
-                        color: ColorResource.button1,
-                      ),
-                      SizedBox(height: 10,),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: ColorResource.searchBar,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
+              Stack(
+                children: [
+
+
+
+                  RefreshIndicator(
+                    onRefresh: _handleRefresh,
+
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CustomImageView(
-                              imagePath: AppImages.empImage,
-                              height: 13,
-                              width: 13,
+                            Center(
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: 128,
+                                    height: 128,
+                                    decoration: ShapeDecoration(
+                                      image: profileImage != null
+                                          ? DecorationImage(
+                                        image: FileImage(profileImage!),
+                                        fit: BoxFit.cover,
+                                      )
+                                          : null,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                          width: 4,
+                                          color: const Color(0x191D4FD7),
+                                        ),
+                                        borderRadius: BorderRadius.circular(9999),
+                                      ),
+                                    ),
+
+                                    child: profileImage == null
+                                        ? Icon(Icons.person, size: 60, color: Colors.grey)
+                                        : null,
+                                  ),
+
+                                  Positioned(
+                                    bottom: 4,
+                                    right: 4,
+                                    child: GestureDetector(
+                                      onTap: openEditProfile,
+                                      child: Container(
+                                        padding: EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: ColorResource.button1,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            SizedBox(width: 5),
+                            SizedBox(height: 10),
                             CustomText(
-                              profileProvider.getProfileModel?.data?.staffId ?? "",
-                              size: 12,
-                              weight: FontWeight.w500,
-                              color: ColorResource.gray,
+                              profileProvider.getProfileModel?.data?.fullName ?? "",
+                            //  name ?? "Your Name",
+                              size: 18,
+                              weight: FontWeight.w700,
+                              color: ColorResource.black,
                             ),
+                            CustomText(
+                              "SENIOR  MANAGER",
+                              //title ?? "Your Title",
+                              size: 14,
+                              weight: FontWeight.w600,
+                              color: ColorResource.button1,
+                            ),
+                            SizedBox(height: 10,),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: ColorResource.searchBar,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CustomImageView(
+                                    imagePath: AppImages.empImage,
+                                    height: 13,
+                                    width: 13,
+                                  ),
+                                  SizedBox(width: 5),
+                                  CustomText(
+                                    profileProvider.getProfileModel?.data?.staffId ?? "",
+                                    size: 12,
+                                    weight: FontWeight.w500,
+                                    color: ColorResource.gray,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 10,),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: ColorResource.white,
+                                border: const Border(
+                                  bottom: BorderSide(
+                                    width: 1,
+                                    color: Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: List.generate(
+                                  tabs.length,
+                                      (index) => Expanded(
+                                    child: ProfileTabItem(
+                                      title: tabs[index],
+                                      isSelected: selectedTab == index,
+                                      onTap: () {
+                                        setState(() {
+                                          selectedTab = index;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+
+                            const SizedBox(height: 10),
+
+                            selectedTab == 0
+                                ? const GeneralScreen()
+                                : selectedTab == 1
+                                ? const SalaryScreen()
+                                : const CoreHrScreen(),
+
                           ],
                         ),
                       ),
-                      SizedBox(height: 10,),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: ColorResource.white,
-                          border: const Border(
-                            bottom: BorderSide(
-                              width: 1,
-                              color: Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: List.generate(
-                            tabs.length,
-                                (index) => Expanded(
-                              child: ProfileTabItem(
-                                title: tabs[index],
-                                isSelected: selectedTab == index,
-                                onTap: () {
-                                  setState(() {
-                                    selectedTab = index;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-
-                      const SizedBox(height: 10),
-
-                      selectedTab == 0
-                          ? const GeneralScreen()
-                          : selectedTab == 1
-                          ? const SalaryScreen()
-                          : const CoreHrScreen(),
-
-                    ],
+                    ),
                   ),
-                ),
+
+                  if (isRefreshing)
+                    const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Center(child:  LinearProgressIndicator(
+                        color: ColorResource.button1,
+                        minHeight: 2,
+                      )),
+                    ),
+                ],
               ),
             ),
           );
