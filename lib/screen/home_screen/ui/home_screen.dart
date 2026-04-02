@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:nexwage/screen/home_screen/provider/home_provider.dart';
@@ -14,9 +13,7 @@ import 'package:nexwage/widget/custom_text.dart';
 import 'package:nexwage/widget/navigator_method.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../util/core/device_id/device_service.dart';
-import '../../../widget/commonAppButton.dart';
 import '../../attendance_screen/provider/attendance_provider.dart';
 import '../../holidays/ui/holidays_Screen.dart';
 import '../../hr_reports/ui/hr_reports.dart';
@@ -25,9 +22,7 @@ import '../../project/ui/project_screen.dart';
 import '../../reimbursement/ui/reimbursement_screen.dart';
 import '../../tasks/ui/tasks_screen.dart';
 import '../../tickets/ui/tickets_screen.dart';
-import 'dart:io';
 import 'package:flutter/services.dart';
-
 import 'Announecement.dart';
 import '_buildCardItem.dart';
 import 'hedingTitle.dart';

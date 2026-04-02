@@ -25,6 +25,7 @@ class _EmergencyContactState extends State<EmergencyContact> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController relationController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController personEmailController = TextEditingController();
 
   @override
   void initState() {
@@ -139,6 +140,19 @@ class _EmergencyContactState extends State<EmergencyContact> {
                         keyboardType: TextInputType.number,
                       ),
 
+                      const SizedBox(height: 10),
+                      CustomText(
+                        'Person Email',
+                        size: 14,
+                        weight: FontWeight.w400,
+                        color: ColorResource.gray,
+                      ),
+                      CommonTextFormField(
+                        prefixIcon: Icons.email_outlined,
+                        controller: personEmailController,
+                        hintText: 'Person Email',
+                      ),
+
 
 
                       const SizedBox(height: 30),
@@ -149,36 +163,12 @@ class _EmergencyContactState extends State<EmergencyContact> {
                               relation: relationController.text.trim(),
                               contact_name: nameController.text.trim(),
                               personal_phone: phoneController.text.trim(),
-                              personal_email: 'static@gmail.com'
+                              personal_email: personEmailController.text.trim(),
                           );
 
                         },
                       ),
 
-                      // CommonAppButton(
-                      //   text: widget.emergencyData == null ? 'Save Contact' : 'Update Contact',
-                      //   isLoading: provider.loading1,
-                      //   onPressed: () {
-                      //     if (widget.emergencyData == null) {
-                      //       // ✅ ADD NEW CONTACT
-                      //       provider.PostEmergencyContact(
-                      //         relation: relationController.text.trim(),
-                      //         contact_name: nameController.text.trim(),
-                      //         personal_phone: phoneController.text.trim(),
-                      //         personal_email: 'static@gmail.com',
-                      //       );
-                      //     } else {
-                      //       // ✅ UPDATE EXISTING CONTACT
-                      //       provider.UpdateEmergencyContact(
-                      //         id: widget.emergencyData!.id, // 👈 important
-                      //         relation: relationController.text.trim(),
-                      //         contact_name: nameController.text.trim(),
-                      //         personal_phone: phoneController.text.trim(),
-                      //         personal_email: 'static@gmail.com',
-                      //       );
-                      //     }
-                      //   },
-                      // ),
                       SizedBox(height: 10,),
                       CommonAppButton(
                           text: 'Cancel',

@@ -79,16 +79,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               backgroundColor: ColorResource.white,
               body:
-
-
               Stack(
                 children: [
-
-
-
                   RefreshIndicator(
                     onRefresh: _handleRefresh,
-
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.all(15),
@@ -153,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: ColorResource.black,
                             ),
                             CustomText(
-                              "SENIOR  MANAGER",
+                                profileProvider.getProfileModel?.data?.designation?.designationName ?? "SENIOR  MANAGER",
                               //title ?? "Your Title",
                               size: 14,
                               weight: FontWeight.w600,
@@ -228,7 +222,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-
                   if (isRefreshing)
                     const Positioned(
                       top: 0,

@@ -42,13 +42,15 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 print("??????????????????");
     try {
-      _postEmergencyContactModel = await _repo.emergencyContactApi(
+    var response =  _postEmergencyContactModel = await _repo.emergencyContactApi(
         relation: relation,
         contact_name: contact_name,
         personal_phone: personal_phone,
         personal_email: personal_email,
 
       );
+
+      print("API RESPONSE: $response");
     } catch (e) {
       _error = e.toString();
     } finally {
