@@ -14,6 +14,7 @@ import '../../../../change_password/ui/change_password.dart';
 import '../../../../document/ui/document_screen.dart';
 import '../../../../update_bank_details/ui/update_bank_details.dart';
 import '../../../../work_experience/ui/work_experience.dart';
+import '../../../model/emergency_get_all_data_model.dart';
 import '../../../model/emergency_model.dart';
 import '../../../model/social_profile_model.dart';
 import '../../../provider/profile_provider.dart';
@@ -32,11 +33,11 @@ class _GeneralScreenState extends State<GeneralScreen> {
     super.initState();
     Future.microtask(() {
       Provider.of<ProfileProvider>(context, listen: false).getProfileData();
+      Provider.of<ProfileProvider>(context, listen: false).getemergencyGetAllData();
     });
   }
   List<SocialProfile> socialProfiles = [];
-  EmergencyModel? emergencyData;
-  List<EmergencyModel> emergencyList = [];
+
   Map<String, String> userData = {
     "name": "",
     "dob": "",
@@ -128,6 +129,69 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 ),
               ),
               SizedBox(height: 10),
+              // Container(
+              //   padding: const EdgeInsets.all(16),
+              //   decoration: BoxDecoration(
+              //     border: Border.all(color: Color(0xFFE2E8F0)),
+              //     borderRadius: BorderRadius.circular(8),
+              //   ),
+              //   child: Column(
+              //     children: [
+              //       Row(
+              //         children: [
+              //           CustomImageView(
+              //             imagePath: AppImages.emregence,
+              //             height: 18,
+              //             width: 24,
+              //           ),
+              //           const SizedBox(width: 5),
+              //           CustomText(
+              //             'Emergency Contact',
+              //             size: 16,
+              //             weight: FontWeight.w700,
+              //             color: ColorResource.black,
+              //           ),
+              //           Spacer(),
+              //           GestureDetector(
+              //             onTap: () async {
+              //               final result = await Navigator.push(
+              //                 context,
+              //                 MaterialPageRoute(
+              //                   builder: (_) => const EmergencyContact(),
+              //                 ),
+              //               );
+              //
+              //
+              //             },
+              //             child: CustomText(
+              //               'Add',
+              //               size: 14,
+              //               weight: FontWeight.w600,
+              //               color: ColorResource.button1,
+              //             ),
+              //           ),
+              //
+              //         ],
+              //       ),
+              //       const SizedBox(height: 10),
+              //         ListView.builder(
+              //           shrinkWrap: true,
+              //           physics: NeverScrollableScrollPhysics(),
+              //           itemCount: profileProvider.emergencyGetAllDataModel?.data?.length ?? 0,
+              //           itemBuilder: (context, index) {
+              //             print("Emergency Data: ${profileProvider.emergencyGetAllDataModel?.data?.[index].} | ${profileProvider.emergencyList[index].relation} | ${profileProvider.emergencyList[index].phone}");
+              //             return Padding(
+              //               padding: const EdgeInsets.only(bottom: 10),
+              //               child: emergencyCard(profileProvider.emergencyGetAllDataModel?.data[index], index),
+              //             );
+              //           },
+              //         )
+              //       else
+              //         CustomText('No contact added')
+              //     ],
+              //   ),
+              // ),
+
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -151,6 +215,8 @@ class _GeneralScreenState extends State<GeneralScreen> {
                           color: ColorResource.black,
                         ),
                         Spacer(),
+
+                        /// ADD BUTTON
                         GestureDetector(
                           onTap: () async {
                             final result = await Navigator.push(
@@ -160,9 +226,13 @@ class _GeneralScreenState extends State<GeneralScreen> {
                               ),
                             );
 
-                            if (result != null && result is EmergencyModel) {
+                            /// 🔥 Refresh after add
+                            if (result != null && result is EmergencyContactData) {
                               setState(() {
-                                emergencyList.add(result);
+                                profileProvider
+                                    .emergencyGetAllDataModel!
+                                    .data!
+                                    .add(result);
                               });
                             }
                           },
@@ -173,24 +243,35 @@ class _GeneralScreenState extends State<GeneralScreen> {
                             color: ColorResource.button1,
                           ),
                         ),
-
                       ],
                     ),
+
                     const SizedBox(height: 10),
-                    if (emergencyList.isNotEmpty)
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: emergencyList.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: emergencyCard(emergencyList[index], index),
-                          );
-                        },
-                      )
-                    else
-                      CustomText('No contact added')
+
+                    /// ✅ CONDITION FIX
+                    (profileProvider.emergencyGetAllDataModel?.data?.isNotEmpty ?? false)
+                        ? ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: profileProvider
+                          .emergencyGetAllDataModel?.data?.length ??
+                          0,
+                      itemBuilder: (context, index) {
+                        final item = profileProvider
+                            .emergencyGetAllDataModel
+                            ?.data?[index];
+
+                        /// ✅ PRINT FIX
+                        print(
+                            "Emergency Data: ${item?.contactName} | ${item?.relation} | ${item?.personalPhone}");
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: emergencyCard(item!, index),
+                        );
+                      },
+                    )
+                        : CustomText('No contact added'),
                   ],
                 ),
               ),
@@ -606,8 +687,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
         }
     );
   }
-
-  Widget emergencyCard(EmergencyModel data, int index) {
+  Widget emergencyCard(EmergencyContactData data, int index) {
     return Row(
       children: [
         Container(
@@ -626,13 +706,13 @@ class _GeneralScreenState extends State<GeneralScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomText(
-              data.name,
+              data.contactName ?? "",
               size: 14,
               weight: FontWeight.w600,
               color: ColorResource.black,
             ),
             CustomText(
-              '${data.relation} • ${data.phone}',
+              '${data.relation ?? ''} • ${data.personalPhone ?? ''}',
               size: 12,
               weight: FontWeight.w400,
               color: ColorResource.gray,
@@ -642,23 +722,11 @@ class _GeneralScreenState extends State<GeneralScreen> {
 
         Spacer(),
 
-        /// ✅ EDIT
         GestureDetector(
           onTap: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EmergencyContact(
-                  emergencyData: data,
-                ),
-              ),
-            );
+           navPush(context: context, action: EmergencyContact());
 
-            if (result != null && result is EmergencyModel) {
-              setState(() {
-                emergencyList[index] = result; // ✅ update specific item
-              });
-            }
+
           },
           child: CustomText(
             'Edit',
@@ -670,6 +738,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
       ],
     );
   }
+
 
   Widget titleCard(String title, String? value) {
     return Padding(

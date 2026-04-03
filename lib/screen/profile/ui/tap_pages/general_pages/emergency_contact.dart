@@ -3,18 +3,18 @@ import 'package:nexwage/screen/profile/provider/profile_provider.dart';
 import 'package:nexwage/widget/commonAppBar.dart';
 import 'package:nexwage/widget/commonAppButton.dart';
 import 'package:provider/provider.dart';
-
 import '../../../../../util/color/app_colors.dart';
 import '../../../../../util/image_resource/image_resource.dart';
 import '../../../../../widget/commonTextFormField.dart';
 import '../../../../../widget/customImageView.dart';
 import '../../../../../widget/custom_text.dart';
+import '../../../model/emergency_get_all_data_model.dart';
 import '../../../model/emergency_model.dart';
 
 class EmergencyContact extends StatefulWidget {
-  final EmergencyModel? emergencyData;
+  final EmergencyGetAllDataModel? data;
 
-  const EmergencyContact({super.key, this.emergencyData});
+  const EmergencyContact({super.key, this.data});
 
   @override
   State<EmergencyContact> createState() => _EmergencyContactState();
@@ -30,11 +30,8 @@ class _EmergencyContactState extends State<EmergencyContact> {
   @override
   void initState() {
     super.initState();
-    if (widget.emergencyData != null) {
-      nameController.text = widget.emergencyData!.name;
-      relationController.text = widget.emergencyData!.relation;
-      phoneController.text = widget.emergencyData!.phone;
-    }
+
+
   }
   final List<String> relations = [
     "Spouse",
@@ -50,7 +47,7 @@ class _EmergencyContactState extends State<EmergencyContact> {
           return  SafeArea(
             top: false,
             child: Scaffold(
-              appBar: CommonAppBar(title:  widget.emergencyData == null ? "Add Contact" : "Edit Contact",),
+              appBar: CommonAppBar(title:  widget.data == null ? "Add Contact" : "Edit Contact",),
               backgroundColor: ColorResource.white,
               body: SingleChildScrollView(
                 child: Padding(
@@ -73,28 +70,18 @@ class _EmergencyContactState extends State<EmergencyContact> {
                                 color: ColorResource.gray,
                               ), ), ], ), ),
                       SizedBox(height: 10,),
-                      CustomText(
-                        'Contact Name',
-                        size: 14,
-                        weight: FontWeight.w400,
-                        color: ColorResource.gray,
-                      ),
+                      labelText(title: 'Contact Name'),
                       CommonTextFormField(
-                        controller: nameController,
+                        controller: provider.nameController,
                         prefixIcon: Icons.person_2_outlined,
                         hintText: 'Enter Name',
                       ),
 
                       const SizedBox(height: 10),
-                      CustomText(
-                        'Relationship',
-                        size: 14,
-                        weight: FontWeight.w400,
-                        color: ColorResource.gray,
-                      ),
+                      labelText(title: 'Relationship'),
 
                       CommonTextFormField(
-                        controller: relationController,
+                        controller: provider.relationController,
                         prefixIcon: Icons.share,
                         hintText: 'Selected Relationship',
                         suffixIcon: Icon(Icons.keyboard_arrow_down),
@@ -112,7 +99,9 @@ class _EmergencyContactState extends State<EmergencyContact> {
                                     return ListTile(
                                       title: Text(relations[index]),
                                       onTap: () {
-                                        relationController.text = relations[index];
+                                        // ✅ FIX HERE
+                                        provider.relationController.text = relations[index];
+
                                         Navigator.pop(context);
                                       },
                                     );
@@ -126,14 +115,9 @@ class _EmergencyContactState extends State<EmergencyContact> {
 
 
                       const SizedBox(height: 10),
-                      CustomText(
-                        'Phone Number',
-                        size: 14,
-                        weight: FontWeight.w400,
-                        color: ColorResource.gray,
-                      ),
+                      labelText(title: 'Phone Number'),
                       CommonTextFormField(
-                        controller: phoneController,
+                        controller: provider.phoneController,
                         prefixIcon: Icons.call,
                         hintText: 'Phone Number',
                         maxLength: 10,
@@ -141,34 +125,24 @@ class _EmergencyContactState extends State<EmergencyContact> {
                       ),
 
                       const SizedBox(height: 10),
-                      CustomText(
-                        'Person Email',
-                        size: 14,
-                        weight: FontWeight.w400,
-                        color: ColorResource.gray,
-                      ),
+                      labelText(title: 'Person Email'),
                       CommonTextFormField(
                         prefixIcon: Icons.email_outlined,
-                        controller: personEmailController,
+                        controller: provider.personEmailController,
                         hintText: 'Person Email',
                       ),
 
 
 
                       const SizedBox(height: 30),
-                      CommonAppButton(text: 'Save Contact',
+
+                      CommonAppButton(
+                        text: 'Save Contact',
                         isLoading: provider.loading1,
                         onPressed: () {
-                          provider.PostEmergencyContact(
-                              relation: relationController.text.trim(),
-                              contact_name: nameController.text.trim(),
-                              personal_phone: phoneController.text.trim(),
-                              personal_email: personEmailController.text.trim(),
-                          );
-
+                          provider.submitEmergencyContact(context);
                         },
                       ),
-
                       SizedBox(height: 10,),
                       CommonAppButton(
                           text: 'Cancel',
@@ -191,4 +165,15 @@ class _EmergencyContactState extends State<EmergencyContact> {
         }
     );
   }
+  Widget labelText({required String title}){
+    return CustomText(
+      title,
+      size: 14,
+      weight: FontWeight.w400,
+      color: ColorResource.gray,
+    );
+  }
 }
+
+
+
