@@ -81,14 +81,10 @@ class LeaveRepository {
       if (attachment == null && oldProfileImage != null) {
         fields["attachment"] = oldProfileImage;
       }
-
       final files = <String, File>{};
-
-      /// ✅ FIX HERE
       if (attachment != null) {
-        files["attachment"] = attachment; // 🔥 correct key
+        files["attachment"] = attachment;
       }
-
       if (kDebugMode) {
         log("📤 Fields => $fields");
         log("🖼 Files => ${files.keys}");
@@ -100,10 +96,9 @@ class LeaveRepository {
         fields: fields,
         files: files,
       );
-
       return ApplyLeaveModel.fromJson(response);
     } catch (e) {
-      log("❌ Apply Leave API Error => $e");
+      log(" Apply Leave API Error => $e");
       rethrow;
     }
   }

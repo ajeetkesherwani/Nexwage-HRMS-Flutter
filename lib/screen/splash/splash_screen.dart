@@ -1,4 +1,4 @@
-import 'dart:async';
+  import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,16 +29,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void loadInitialData() async {
-
-
-
     final appProvider = Provider.of<AppVersionProvider>(context, listen: false);
-
-
-
     await appProvider.fetchAppVersion();
-
-
     if (mounted) {
       await checkVersionAndShowDialog(appProvider);
     }

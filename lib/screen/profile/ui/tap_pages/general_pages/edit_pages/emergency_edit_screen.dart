@@ -3,24 +3,25 @@ import 'package:nexwage/screen/profile/provider/profile_provider.dart';
 import 'package:nexwage/widget/commonAppBar.dart';
 import 'package:nexwage/widget/commonAppButton.dart';
 import 'package:provider/provider.dart';
-import '../../../../../util/color/app_colors.dart';
-import '../../../../../util/image_resource/image_resource.dart';
-import '../../../../../widget/commonTextFormField.dart';
-import '../../../../../widget/customImageView.dart';
-import '../../../../../widget/custom_text.dart';
-import '../../../model/emergency_get_all_data_model.dart';
-import '../../../model/emergency_model.dart';
 
-class EmergencyContact extends StatefulWidget {
-  final EmergencyContactData? data;
+import '../../../../../../util/color/app_colors.dart';
+import '../../../../../../util/image_resource/image_resource.dart';
+import '../../../../../../widget/commonTextFormField.dart';
+import '../../../../../../widget/customImageView.dart';
+import '../../../../../../widget/custom_text.dart';
 
-  const EmergencyContact({super.key, this.data});
+
+
+class EmergencyContactEditScreen extends StatefulWidget {
+  final String  id;
+
+  const EmergencyContactEditScreen({super.key, required this.id});
 
   @override
-  State<EmergencyContact> createState() => _EmergencyContactState();
+  State<EmergencyContactEditScreen> createState() => _EmergencyContactEditScreenState();
 }
 
-class _EmergencyContactState extends State<EmergencyContact> {
+class _EmergencyContactEditScreenState extends State<EmergencyContactEditScreen> {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController relationController = TextEditingController();
@@ -30,7 +31,9 @@ class _EmergencyContactState extends State<EmergencyContact> {
   @override
   void initState() {
     super.initState();
-
+    Future.microtask(() {
+      Provider.of<ProfileProvider>(context, listen: false).getemergencyGetByIdData( id: '${widget.id}');
+    });
 
   }
   final List<String> relations = [
@@ -47,7 +50,7 @@ class _EmergencyContactState extends State<EmergencyContact> {
           return  SafeArea(
             top: false,
             child: Scaffold(
-              appBar: CommonAppBar(title:  widget.data == null ? "Add Contact" : "Edit Contact",),
+              appBar: CommonAppBar(title:"Edit Contact",),
               backgroundColor: ColorResource.white,
               body: SingleChildScrollView(
                 child: Padding(
@@ -140,7 +143,7 @@ class _EmergencyContactState extends State<EmergencyContact> {
                         text: 'Save Contact',
                         isLoading: provider.loading1,
                         onPressed: () {
-                          provider.submitEmergencyContact(context);
+                          provider.updateEmergencyContact(context, widget.id);
                         },
                       ),
                       SizedBox(height: 10,),

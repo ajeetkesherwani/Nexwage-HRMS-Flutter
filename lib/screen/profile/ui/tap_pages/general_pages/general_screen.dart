@@ -19,6 +19,7 @@ import '../../../model/emergency_model.dart';
 import '../../../model/social_profile_model.dart';
 import '../../../provider/profile_provider.dart';
 import 'basicInfo_edit_page.dart';
+import 'edit_pages/emergency_edit_screen.dart';
 import 'emergency_contact.dart';
 class GeneralScreen extends StatefulWidget {
   const GeneralScreen({super.key});
@@ -34,6 +35,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
     Future.microtask(() {
       Provider.of<ProfileProvider>(context, listen: false).getProfileData();
       Provider.of<ProfileProvider>(context, listen: false).getemergencyGetAllData();
+      Provider.of<ProfileProvider>(context, listen: false).getAllDocument();
     });
   }
   List<SocialProfile> socialProfiles = [];
@@ -129,69 +131,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 ),
               ),
               SizedBox(height: 10),
-              // Container(
-              //   padding: const EdgeInsets.all(16),
-              //   decoration: BoxDecoration(
-              //     border: Border.all(color: Color(0xFFE2E8F0)),
-              //     borderRadius: BorderRadius.circular(8),
-              //   ),
-              //   child: Column(
-              //     children: [
-              //       Row(
-              //         children: [
-              //           CustomImageView(
-              //             imagePath: AppImages.emregence,
-              //             height: 18,
-              //             width: 24,
-              //           ),
-              //           const SizedBox(width: 5),
-              //           CustomText(
-              //             'Emergency Contact',
-              //             size: 16,
-              //             weight: FontWeight.w700,
-              //             color: ColorResource.black,
-              //           ),
-              //           Spacer(),
-              //           GestureDetector(
-              //             onTap: () async {
-              //               final result = await Navigator.push(
-              //                 context,
-              //                 MaterialPageRoute(
-              //                   builder: (_) => const EmergencyContact(),
-              //                 ),
-              //               );
-              //
-              //
-              //             },
-              //             child: CustomText(
-              //               'Add',
-              //               size: 14,
-              //               weight: FontWeight.w600,
-              //               color: ColorResource.button1,
-              //             ),
-              //           ),
-              //
-              //         ],
-              //       ),
-              //       const SizedBox(height: 10),
-              //         ListView.builder(
-              //           shrinkWrap: true,
-              //           physics: NeverScrollableScrollPhysics(),
-              //           itemCount: profileProvider.emergencyGetAllDataModel?.data?.length ?? 0,
-              //           itemBuilder: (context, index) {
-              //             print("Emergency Data: ${profileProvider.emergencyGetAllDataModel?.data?.[index].} | ${profileProvider.emergencyList[index].relation} | ${profileProvider.emergencyList[index].phone}");
-              //             return Padding(
-              //               padding: const EdgeInsets.only(bottom: 10),
-              //               child: emergencyCard(profileProvider.emergencyGetAllDataModel?.data[index], index),
-              //             );
-              //           },
-              //         )
-              //       else
-              //         CustomText('No contact added')
-              //     ],
-              //   ),
-              // ),
-
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -247,23 +186,18 @@ class _GeneralScreenState extends State<GeneralScreen> {
                     ),
 
                     const SizedBox(height: 10),
-
-                    /// ✅ CONDITION FIX
                     (profileProvider.emergencyGetAllDataModel?.data?.isNotEmpty ?? false)
                         ? ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: profileProvider
-                          .emergencyGetAllDataModel?.data?.length ??
-                          0,
+                     // itemCount: profileProvider.emergencyGetAllDataModel?.data?.length ?? 0,
+                      itemCount: (profileProvider.emergencyGetAllDataModel?.data?.length ?? 0).clamp(0, 2),
                       itemBuilder: (context, index) {
                         final item = profileProvider
                             .emergencyGetAllDataModel
                             ?.data?[index];
 
-                        /// ✅ PRINT FIX
-                        print(
-                            "Emergency Data: ${item?.contactName} | ${item?.relation} | ${item?.personalPhone}");
+
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10),
@@ -381,71 +315,110 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 decoration: BoxDecoration(
                   border: Border.all(color: Color(0xFFE2E8F0)),
                   borderRadius: BorderRadius.circular(8),
-                ),child: Column(
-                children: [
-                  Row(
-                    children: [
-                      CustomImageView(
-                        imagePath:AppImages.fileBlue,
-                        height: 23,
-                        width: 20,
-                      ),
-                      SizedBox(width: 5,),
-                      CustomText(
-                        'Documents',
-                        size: 16,
-                        weight: FontWeight.w600,
-                        color: ColorResource.black,
-                      ),
-                      Spacer(),
-                      GestureDetector(
-                        onTap: (){
-                          navPush(context: context, action: DocumentScreen());
-                        },
-                        child: CustomText(
-                          'Upload',
-                          size: 14,
-                          weight: FontWeight.w600,
-                          color: ColorResource.button1,
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 10,),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 1,
-                          color: const Color(0xFFF1F5F9),
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Row(
+                ),
+                child: Column(
+                  children: [
+                    // Header row with icon, title, and upload button
+                    Row(
                       children: [
-                        Icon(Icons.file_copy_rounded,color: ColorResource.gray,),
-                        SizedBox(width: 5,),
+                        CustomImageView(
+                          imagePath: AppImages.fileBlue,
+                          height: 23,
+                          width: 20,
+                        ),
+                        const SizedBox(width: 5),
                         CustomText(
-                          'PAN Card',
-                          size: 14,
-                          weight: FontWeight.w400,
+                          'Documents',
+                          size: 16,
+                          weight: FontWeight.w600,
                           color: ColorResource.black,
                         ),
-                        Spacer(),
-                        CustomImageView(
-                          imagePath: AppImages.download,
-                          height: 18,
-                          width: 18,
-
-                        )
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: () {
+                            navPush(context: context, action: DocumentScreen());
+                          },
+                          child: CustomText(
+                            'Upload',
+                            size: 14,
+                            weight: FontWeight.w600,
+                            color: ColorResource.button1,
+                          ),
+                        ),
                       ],
                     ),
-                  )
-                ],
-              ),
+
+                    const SizedBox(height: 10),
+
+                    // Null-safe ListView for documents
+                    Builder(
+                      builder: (context) {
+                        final documentList =
+                            profileProvider.getDocumentDataModel?.data ?? [];
+
+                        if (documentList.isEmpty) {
+                          return Center(
+                            child: CustomText(
+                              "No documents available",
+                              size: 14,
+                              weight: FontWeight.w400,
+                              color: ColorResource.gray,
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: documentList.length,
+                          itemBuilder: (context, index) {
+                            final docData = documentList[index];
+
+                            return Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                    width: 1,
+                                    color: Color(0xFFF1F5F9),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.file_copy_rounded, color: ColorResource.gray),
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: CustomText(
+                                      docData.documentTitle ?? "N/A",
+                                      size: 14,
+                                      weight: FontWeight.w400,
+                                      color: ColorResource.black,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      // Handle download or tap action here
+                                      print('Tapped download for ${docData.documentTitle}');
+                                    },
+                                    child: CustomImageView(
+                                      imagePath: AppImages.download,
+                                      height: 18,
+                                      width: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 10,),
               Container(
@@ -716,7 +689,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
               size: 12,
               weight: FontWeight.w400,
               color: ColorResource.gray,
-            )
+            ),
           ],
         ),
 
@@ -724,7 +697,9 @@ class _GeneralScreenState extends State<GeneralScreen> {
 
         GestureDetector(
           onTap: () async {
-           navPush(context: context, action: EmergencyContact());
+           navPush(context: context, action: EmergencyContactEditScreen(
+             id: data.id.toString(),
+           ));
 
 
           },

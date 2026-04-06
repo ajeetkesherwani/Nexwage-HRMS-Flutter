@@ -1,8 +1,15 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
+import '../model/document_delete_model.dart';
+import '../model/document_mater_model.dart';
+import '../model/emergencyGetByIdModel.dart';
 import '../model/emergency_contact_model.dart';
 import '../model/emergency_get_all_data_model.dart';
+import '../model/emergency_get_byId_update_model.dart';
+import '../model/getDocumentDataModel.dart';
 import '../model/get_profile_model.dart';
 import '../repo/profile_repo.dart';
 
@@ -42,6 +49,38 @@ class ProfileProvider with ChangeNotifier {
      loading = false;
      notifyListeners();
    }
+
+
+   EmergencyGetByIdModel? emergencyGetByIdModel;
+
+
+
+   Future<void> getemergencyGetByIdData({required String id}) async {
+     loading = true;
+     notifyListeners();
+
+     try {
+       emergencyGetByIdModel =
+       await _repo.emergencyContactGetByIdDataApi(id: id);
+
+       // ✅ SET DATA TO CONTROLLERS HERE
+       final data = emergencyGetByIdModel?.data;
+
+       if (data != null) {
+         nameController.text = data.contactName ?? '';
+         relationController.text = data.relation ?? '';
+         phoneController.text = data.personalPhone ?? '';
+         personEmailController.text = data.personalEmail ?? '';
+       }
+
+     } catch (e) {
+       print("ReservedRides API ERROR: $e");
+     }
+
+     loading = false;
+     notifyListeners();
+   }
+
 
 
   EmergencyContactModel? _postEmergencyContactModel;
@@ -144,6 +183,8 @@ class ProfileProvider with ChangeNotifier {
     personEmailController.dispose();
     super.dispose();
   }
+   EmergencyGetByIdUpdateModel? emergencyGetByIdUpdateModel;
+
 
    Future<void> updateEmergencyContact(BuildContext context, String id) async {
      final relation = relationController.text.trim();
@@ -191,7 +232,7 @@ class ProfileProvider with ChangeNotifier {
 
      try {
 
-       _postEmergencyContactModel = await _repo.emergencyContactUpdateApi(
+       emergencyGetByIdUpdateModel = await _repo.emergencyContactUpdateApi(
          id: id,
          relation: relation,
          contact_name: name,
@@ -216,4 +257,143 @@ class ProfileProvider with ChangeNotifier {
      }
    }
 
+   // Documnet Part ====================================
+   DocumentMasterModel? documentMasterModel;
+
+   Future<void> documnetMasterApiData({bool isRefresh = false}) async {
+     loading = true;
+     notifyListeners();
+     try {
+       documentMasterModel = await _repo.documnetMasterApi();
+     } catch (e) {
+       print("ReservedRides API ERROR: $e");
+     }
+     loading = false;
+     notifyListeners();
+   }
+
+   //Document Post Model
+   bool isLoading = false;
+   Future<void> documentDataPost({
+     required String document_title,
+     required String document_type_id,
+     required String expiry_date,
+     File? document_file,
+   }) async {
+
+
+     try {
+       isLoading = true;
+       notifyListeners();
+
+       final response = await _repo.documentPost(
+         document_title: document_title,
+         document_type_id: document_type_id,
+         expiry_date: expiry_date,
+         document_file: document_file,
+       );
+
+       if (response.status == true) {
+         print(" Applied Successfully");
+       } else {
+         // errorMessage = response.message;
+       }
+     } catch (e) {
+       // errorMessage = e.toString();
+     } finally {
+       isLoading = false;
+       notifyListeners();
+     }
+   }
+
+   // Get All Document Data
+   GetDocumentDataModel? getDocumentDataModel;
+
+   Future<void> getAllDocument({bool isRefresh = false}) async {
+     loading = true;
+     notifyListeners();
+     try {
+       getDocumentDataModel = await _repo.getAllDocument();
+     } catch (e) {
+       print("ReservedRides API ERROR: $e");
+     }
+     loading = false;
+     notifyListeners();
+   }
+
+   //document Delete
+   DocumentDeleteModel? documentDeleteModel;
+
+
+   Future<void> deleteDocument({required String id, bool isRefresh = false}) async {
+     loading = true;
+     notifyListeners();
+
+     try {
+       final response = await _repo.documentDelete(id: id);
+
+       if (response != null) {
+         documentDeleteModel = response;
+       } else {
+         // fallback for APIs returning no content
+         documentDeleteModel = DocumentDeleteModel(
+           status: true,
+           message: 'Document deleted successfully',
+         );
+       }
+
+       if (isRefresh) {
+         await refreshDocumentList();
+       }
+     } catch (e) {
+       print("Delete Document API ERROR: $e");
+       documentDeleteModel = DocumentDeleteModel(
+         status: false,
+         message: e.toString(),
+       );
+     } finally {
+       loading = false;
+       notifyListeners();
+     }
+   }
+
+
+  Future<void> refreshDocumentList() async {
+
+  }
+
+
+  //Qualification Post Data
+
+   Future<void> qualificationPostData({
+     required String document_title,
+     required String document_type_id,
+     required String expiry_date,
+     File? document_file,
+   }) async {
+
+
+     try {
+       isLoading = true;
+       notifyListeners();
+
+       final response = await _repo.qualificationPost(
+         document_title: document_title,
+         document_type_id: document_type_id,
+         expiry_date: expiry_date,
+         document_file: document_file,
+       );
+
+       if (response.status == true) {
+         print(" Applied Successfully");
+       } else {
+
+       }
+     } catch (e) {
+
+     } finally {
+       isLoading = false;
+       notifyListeners();
+     }
+   }
 }

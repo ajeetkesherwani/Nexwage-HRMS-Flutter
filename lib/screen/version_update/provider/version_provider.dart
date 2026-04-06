@@ -11,7 +11,6 @@ class AppVersionProvider with ChangeNotifier {
   bool loading = false;
   AppVersionModel? appVersionModel;
   Future<String> getCurrentVersion() async {
-    // example using package_info_plus
     final info = await PackageInfo.fromPlatform();
     return info.version;
   }

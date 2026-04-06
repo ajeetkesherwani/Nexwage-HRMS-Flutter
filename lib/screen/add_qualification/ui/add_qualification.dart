@@ -4,6 +4,7 @@ import 'package:nexwage/widget/commonAppBar.dart';
 import 'package:nexwage/widget/commonAppButton.dart';
 import 'package:nexwage/widget/commonTextFormField.dart';
 import 'package:nexwage/widget/custom_text.dart';
+import 'package:intl/intl.dart';
 
 class AddQualification extends StatefulWidget {
   const AddQualification({super.key});
@@ -13,6 +14,22 @@ class AddQualification extends StatefulWidget {
 }
 
 class _AddQualificationState extends State<AddQualification> {
+  TextEditingController _startDateController = TextEditingController();
+  TextEditingController _endDateController = TextEditingController();
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        controller.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -54,18 +71,22 @@ class _AddQualificationState extends State<AddQualification> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CustomText(
-                              'YEAR OF PASSING',
-                              size: 14,
-                              weight: FontWeight.w600,
-                              color: ColorResource.black,
+                            Text(
+                              'Start Date',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
                             ),
                             SizedBox(height: 5),
-                            CommonTextFormField(
-                              hintText: 'Select Year',
-                              suffixIcon: Icon(Icons.keyboard_arrow_down_sharp,color: ColorResource.grayText,),
-                              prefixIcon: Icons.calendar_today,
-                            ),
+                        CommonTextFormField(
+                          prefixIcon: Icons.calendar_today,
+                          controller: _startDateController,
+                          suffixIcon: Icon(Icons.keyboard_arrow_down_sharp, color: Colors.grey),
+                          onTap: () => _selectDate(context, _startDateController,
+                          ),
+                        )
                           ],
                         ),
                       ),
@@ -74,17 +95,24 @@ class _AddQualificationState extends State<AddQualification> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CustomText(
-                              'SCORE',
-                              size: 14,
-                              weight: FontWeight.w600,
-                              color: ColorResource.black,
+                            Text(
+                              'End Date',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
                             ),
                             SizedBox(height: 5),
-                            CommonTextFormField(
-                              prefixIcon: Icons.star_border,
-                              hintText: 'e.g. 3.8 or 85%',
-                            ),
+
+                        CommonTextFormField(
+                          prefixIcon: Icons.calendar_today,
+                          hintText: 'Select End Date',
+                          controller: _endDateController,
+                          suffixIcon: Icon(Icons.keyboard_arrow_down_sharp, color: Colors.grey),
+                          onTap: () => _selectDate(context, _endDateController,
+                          ),
+                        )
                           ],
                         ),
                       ),

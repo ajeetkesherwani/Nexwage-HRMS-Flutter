@@ -21,6 +21,9 @@ class AppUrl {
   static const String leaveType = '$baseUrl/api/employee/leaves/types';
   static const String applyLeave = '$baseUrl/api/employee/leaves/apply';
   static const String emergencyContactPost = '$baseUrl/api/employee/profile/contacts';
+  static const String masterData = '$baseUrl/api/master-data';
+  static const String document = '$baseUrl/api/employee/profile/documents';
+  static const String qualifications = '$baseUrl/api/employee/profile/qualifications';
 
  static const String getMonthlyAttendance =
      '$baseUrl/api/employee/attendance/calendar';
