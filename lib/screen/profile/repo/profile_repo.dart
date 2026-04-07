@@ -12,6 +12,8 @@ import '../model/emergency_get_all_data_model.dart';
 import '../model/emergency_get_byId_update_model.dart';
 import '../model/getDocumentDataModel.dart';
 import '../model/get_profile_model.dart';
+import '../model/qualificationGetDataModel.dart';
+import '../model/qualification_post_model.dart';
 
 
 
@@ -225,32 +227,34 @@ class ProfileRepository {
   }
 //  Qualification Post Data
 
-  Future<DocumentPostModel> qualificationPost({
-    required String document_title,
-    required String document_type_id,
-    required String expiry_date,
-    File? document_file,
+  Future<QualificationPostModel> qualificationPost({
+    required String institution_name,
+    required String education_level_id,
+    required String from_date,
+    required String to_date,
+    File? attachment,
     String? oldProfileImage,
   }) async {
     final url = AppUrl.qualifications;
 
     try {
       final fields = {
-        "document_title": document_title,
-        "document_type_id": document_type_id,
-        "expiry_date": expiry_date,
+        "institution_name": institution_name,
+        "education_level_id": education_level_id,
+        "from_date": from_date,
+        "to_date": to_date,
       };
 
-      if (document_file == null && oldProfileImage != null) {
+      if (attachment == null && oldProfileImage != null) {
         fields["attachment"] = oldProfileImage;
       }
       final files = <String, File>{};
-      if (document_file != null) {
-        files["attachment"] = document_file;
+      if (attachment != null) {
+        files["attachment"] = attachment;
       }
       if (kDebugMode) {
-        log("📤 Fields => $fields");
-        log("🖼 Files => ${files.keys}");
+        log(" Fields => $fields");
+        log(" Files => ${files.keys}");
       }
 
       final response =
@@ -259,9 +263,26 @@ class ProfileRepository {
         fields: fields,
         files: files,
       );
-      return DocumentPostModel.fromJson(response);
+      return QualificationPostModel.fromJson(response);
     } catch (e) {
       log(" Apply Leave API Error => $e");
+      rethrow;
+    }
+  }
+
+  //Get All Qualification
+
+  Future<QualificationGetDataModel> getAllQualification() async {
+    try {
+      final response = await _apiService.getApiWithToken(AppUrl.qualifications);
+      print('response: $response');
+      if (response != null) {
+        return QualificationGetDataModel.fromJson(response);
+      } else {
+        throw Exception('Failed to load data: response is null');
+      }
+    } catch (e) {
+      print('Error fetching  data: $e');
       rethrow;
     }
   }

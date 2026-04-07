@@ -230,10 +230,10 @@ int? selectedDocumentId;
                                 itemBuilder: (context, index) {
                                   final doc = documentTypes[index];
                                   return ListTile(
-                                    title: Text(doc.name),
+                                    title: Text(doc.name ?? ""),
                                     onTap: () {
                                       setState(() {
-                                        documentTypeController.text = doc.name;
+                                        documentTypeController.text = doc.name ?? "";
                                         selectedDocumentId = doc.id;
                                       });
                                       Navigator.pop(context);

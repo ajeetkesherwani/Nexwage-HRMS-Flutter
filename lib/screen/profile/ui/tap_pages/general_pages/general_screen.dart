@@ -8,6 +8,7 @@ import 'package:nexwage/widget/customImageView.dart';
 import 'package:nexwage/widget/custom_text.dart';
 import 'package:nexwage/widget/navigator_method.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../add_qualification/ui/add_qualification.dart';
 import '../../../../change_password/ui/change_password.dart';
@@ -36,6 +37,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
       Provider.of<ProfileProvider>(context, listen: false).getProfileData();
       Provider.of<ProfileProvider>(context, listen: false).getemergencyGetAllData();
       Provider.of<ProfileProvider>(context, listen: false).getAllDocument();
+      Provider.of<ProfileProvider>(context, listen: false).getAllQualification();
     });
   }
   List<SocialProfile> socialProfiles = [];
@@ -366,7 +368,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                             ),
                           );
                         }
-
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -402,7 +403,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       // Handle download or tap action here
-                                      print('Tapped download for ${docData.documentTitle}');
+                                      print('Tapped download for ${docData.documentFile}');
                                     },
                                     child: CustomImageView(
                                       imagePath: AppImages.download,
@@ -410,6 +411,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                                       width: 18,
                                     ),
                                   ),
+
                                 ],
                               ),
                             );
@@ -458,18 +460,66 @@ class _GeneralScreenState extends State<GeneralScreen> {
                     ],
                   ),
                   SizedBox(height: 10,),
-                  CustomText(
-                    'MBA in Human Resources',
-                    size: 14,
-                    weight: FontWeight.w700,
-                    color: ColorResource.black,
+                  Builder(
+                      builder: (context) {
+                        final educationList =
+                            profileProvider.qualificationGetDataModel?.data ?? [];
+
+                        if (educationList.isEmpty) {
+                          return Center(
+                            child: CustomText(
+                              "No Qualification available",
+                              size: 14,
+                              weight: FontWeight.w400,
+                              color: ColorResource.gray,
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: educationList.length,
+                        itemBuilder: (context, index) {
+                          final item = educationList[index];
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomText(
+                                  item.institutionName ?? '',
+                                  size: 14,
+                                  weight: FontWeight.w700,
+                                  color: ColorResource.black,
+                                ),
+                                const SizedBox(height: 4),
+                                CustomText(
+                                  "${item.educationLevel?.name ?? ""} - ${item.fromYear?.split('-').last}",
+                                  size: 12,
+                                  weight: FontWeight.w400,
+                                  color: ColorResource.gray,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }
                   ),
-                  CustomText(
-                    'TechCorp Solutions • 2015 - 2018',
-                    size: 12,
-                    weight: FontWeight.w400,
-                    color: ColorResource.gray,
-                  )
+                  // CustomText(
+                  //   'MBA in Human Resources',
+                  //   size: 14,
+                  //   weight: FontWeight.w700,
+                  //   color: ColorResource.black,
+                  // ),
+                  // CustomText(
+                  //   'TechCorp Solutions • 2015 - 2018',
+                  //   size: 12,
+                  //   weight: FontWeight.w400,
+                  //   color: ColorResource.gray,
+                  // )
                 ],
               ),
               ),

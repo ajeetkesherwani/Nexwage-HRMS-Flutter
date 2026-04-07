@@ -1,133 +1,159 @@
 class DocumentMasterModel {
-  bool status;
-  String message;
-  Data data;
+  bool? status;
+  String? message;
+  Data? data;
 
-  DocumentMasterModel({
-    required this.status,
-    required this.message,
-    required this.data,
-  });
+  DocumentMasterModel({this.status, this.message, this.data});
 
-  factory DocumentMasterModel.fromJson(Map<String, dynamic> json) {
-    return DocumentMasterModel(
-      status: json['status'],
-      message: json['message'],
-      data: Data.fromJson(json['data']),
-    );
+  DocumentMasterModel.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
+    message = json['message'];
+    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'status': status,
-      'message': message,
-      'data': data.toJson(),
-    };
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['status'] = this.status;
+    data['message'] = this.message;
+    if (this.data != null) {
+      data['data'] = this.data!.toJson();
+    }
+    return data;
   }
 }
 
 class Data {
-  List<DocumentType> documentTypes;
-  List<Skill> skills;
-  List<Language> languages;
+  List<DocumentTypes>? documentTypes;
+  List<Skills>? skills;
+  List<Languages>? languages;
+  List<QualificationEducationLevel>? qualificationEducationLevel;
 
-  Data({
-    required this.documentTypes,
-    required this.skills,
-    required this.languages,
-  });
+  Data(
+      {this.documentTypes,
+        this.skills,
+        this.languages,
+        this.qualificationEducationLevel});
 
-  factory Data.fromJson(Map<String, dynamic> json) {
-    return Data(
-      documentTypes: (json['document_types'] as List)
-          .map((e) => DocumentType.fromJson(e))
-          .toList(),
-      skills: (json['skills'] as List)
-          .map((e) => Skill.fromJson(e))
-          .toList(),
-      languages: (json['languages'] as List)
-          .map((e) => Language.fromJson(e))
-          .toList(),
-    );
+  Data.fromJson(Map<String, dynamic> json) {
+    if (json['document_types'] != null) {
+      documentTypes = <DocumentTypes>[];
+      json['document_types'].forEach((v) {
+        documentTypes!.add(new DocumentTypes.fromJson(v));
+      });
+    }
+    if (json['skills'] != null) {
+      skills = <Skills>[];
+      json['skills'].forEach((v) {
+        skills!.add(new Skills.fromJson(v));
+      });
+    }
+    if (json['languages'] != null) {
+      languages = <Languages>[];
+      json['languages'].forEach((v) {
+        languages!.add(new Languages.fromJson(v));
+      });
+    }
+    if (json['qualification_education_level'] != null) {
+      qualificationEducationLevel = <QualificationEducationLevel>[];
+      json['qualification_education_level'].forEach((v) {
+        qualificationEducationLevel!
+            .add(new QualificationEducationLevel.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'document_types': documentTypes.map((e) => e.toJson()).toList(),
-      'skills': skills.map((e) => e.toJson()).toList(),
-      'languages': languages.map((e) => e.toJson()).toList(),
-    };
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.documentTypes != null) {
+      data['document_types'] =
+          this.documentTypes!.map((v) => v.toJson()).toList();
+    }
+    if (this.skills != null) {
+      data['skills'] = this.skills!.map((v) => v.toJson()).toList();
+    }
+    if (this.languages != null) {
+      data['languages'] = this.languages!.map((v) => v.toJson()).toList();
+    }
+    if (this.qualificationEducationLevel != null) {
+      data['qualification_education_level'] =
+          this.qualificationEducationLevel!.map((v) => v.toJson()).toList();
+    }
+    return data;
   }
 }
 
-class DocumentType {
-  int id;
-  String name;
+class DocumentTypes {
+  int? id;
+  String? name;
 
-  DocumentType({
-    required this.id,
-    required this.name,
-  });
+  DocumentTypes({this.id, this.name});
 
-  factory DocumentType.fromJson(Map<String, dynamic> json) {
-    return DocumentType(
-      id: json['id'],
-      name: json['name'],
-    );
+  DocumentTypes.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    return data;
   }
 }
 
-class Skill {
-  int id;
-  String name;
+class Skills {
+  int? id;
+  String? name;
 
-  Skill({
-    required this.id,
-    required this.name,
-  });
+  Skills({this.id, this.name});
 
-  factory Skill.fromJson(Map<String, dynamic> json) {
-    return Skill(
-      id: json['id'],
-      name: json['name'],
-    );
+  Skills.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    return data;
   }
 }
 
-class Language {
-  int id;
-  String name;
+class Languages {
+  int? id;
+  String? name;
 
-  Language({
-    required this.id,
-    required this.name,
-  });
+  Languages({this.id, this.name});
 
-  factory Language.fromJson(Map<String, dynamic> json) {
-    return Language(
-      id: json['id'],
-      name: json['name'],
-    );
+  Languages.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    return data;
+  }
+}
+
+class QualificationEducationLevel {
+  int? id;
+  String? name;
+
+  QualificationEducationLevel({this.id, this.name});
+
+  QualificationEducationLevel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    return data;
   }
 }

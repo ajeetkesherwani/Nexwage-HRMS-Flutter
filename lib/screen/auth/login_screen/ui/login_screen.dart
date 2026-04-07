@@ -134,10 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           GestureDetector(
                             onTap: () {
-                              navPush(
-                                context: context,
-                                action: ForgetPasswordScreen(),
-                              );
+                              navPush(context: context, action: ForgetPasswordScreen(),);
                             },
                             child: CustomText(
                               'Forget Password?',

@@ -11,6 +11,7 @@ import '../model/emergency_get_all_data_model.dart';
 import '../model/emergency_get_byId_update_model.dart';
 import '../model/getDocumentDataModel.dart';
 import '../model/get_profile_model.dart';
+import '../model/qualificationGetDataModel.dart';
 import '../repo/profile_repo.dart';
 
 class ProfileProvider with ChangeNotifier {
@@ -366,10 +367,11 @@ class ProfileProvider with ChangeNotifier {
   //Qualification Post Data
 
    Future<void> qualificationPostData({
-     required String document_title,
-     required String document_type_id,
-     required String expiry_date,
-     File? document_file,
+     required String institution_name,
+     required String education_level_id,
+     required String from_date,
+     required String to_date,
+     File? attachment,
    }) async {
 
 
@@ -378,10 +380,11 @@ class ProfileProvider with ChangeNotifier {
        notifyListeners();
 
        final response = await _repo.qualificationPost(
-         document_title: document_title,
-         document_type_id: document_type_id,
-         expiry_date: expiry_date,
-         document_file: document_file,
+         institution_name: institution_name,
+         education_level_id: education_level_id,
+         from_date: from_date,
+         to_date: to_date,
+         attachment: attachment,
        );
 
        if (response.status == true) {
@@ -395,5 +398,20 @@ class ProfileProvider with ChangeNotifier {
        isLoading = false;
        notifyListeners();
      }
+   }
+
+   //Get All Qualification Data
+
+   QualificationGetDataModel? qualificationGetDataModel;
+   Future<void> getAllQualification({bool isRefresh = false}) async {
+     loading = true;
+     notifyListeners();
+     try {
+       qualificationGetDataModel = await _repo.getAllQualification();
+     } catch (e) {
+       print("ReservedRides API ERROR: $e");
+     }
+     loading = false;
+     notifyListeners();
    }
 }

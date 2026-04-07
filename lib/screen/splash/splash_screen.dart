@@ -205,7 +205,7 @@ class _SplashScreenState extends State<SplashScreen> {
     print("SAVED TOKEN: $token");
 
     if (token != null && token.isNotEmpty) {
-      // ✅ Go to Home Screen
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainScreen()),
