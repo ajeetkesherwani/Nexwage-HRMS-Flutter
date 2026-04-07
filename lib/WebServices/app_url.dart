@@ -24,6 +24,9 @@ class AppUrl {
   static const String masterData = '$baseUrl/api/master-data';
   static const String document = '$baseUrl/api/employee/profile/documents';
   static const String qualifications = '$baseUrl/api/employee/profile/qualifications';
+  static const String experiences = '$baseUrl/api/employee/profile/work-experiences';
+  static const String bankDetails = '$baseUrl/api/employee/profile/bank-details';
+  static const String changePassword = '$baseUrl/api/employee/change-password';
 
  static const String getMonthlyAttendance =
      '$baseUrl/api/employee/attendance/calendar';

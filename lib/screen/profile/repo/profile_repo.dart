@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../../../WebServices/app_url.dart';
 import '../../../WebServices/network/network_api_services.dart';
+import '../model/bankAccountPostModel.dart';
+import '../model/chnagePasswordDataModel.dart';
 import '../model/document_delete_model.dart';
 import '../model/document_mater_model.dart';
 import '../model/document_post_model.dart';
@@ -10,6 +12,9 @@ import '../model/emergencyGetByIdModel.dart';
 import '../model/emergency_contact_model.dart';
 import '../model/emergency_get_all_data_model.dart';
 import '../model/emergency_get_byId_update_model.dart';
+import '../model/experienceGetAllDataModel.dart';
+import '../model/experiencePostModel.dart';
+import '../model/getBankDataModel.dart';
 import '../model/getDocumentDataModel.dart';
 import '../model/get_profile_model.dart';
 import '../model/qualificationGetDataModel.dart';
@@ -286,5 +291,152 @@ class ProfileRepository {
       rethrow;
     }
   }
+  //experience
+
+
+  Future<ExperiencePostModel> experiencePost({
+    required String company_name,
+    required String post,
+    required String from_date,
+    required String to_date,
+    required String remark,
+    File? attachment,
+    String? oldProfileImage,
+  }) async {
+    final url = AppUrl.experiences;
+
+    try {
+      final fields = {
+        "company_name": company_name,
+        "post": post,
+        "from_date": from_date,
+        "to_date": to_date,
+        "remark": remark,
+      };
+
+      if (attachment == null && oldProfileImage != null) {
+        fields["attachment"] = oldProfileImage;
+      }
+      final files = <String, File>{};
+      if (attachment != null) {
+        files["attachment"] = attachment;
+      }
+      if (kDebugMode) {
+        log(" Fields => $fields");
+        log(" Files => ${files.keys}");
+      }
+
+      final response =
+      await _apiService.postMultipartApiWithToken(
+        url: url,
+        fields: fields,
+        files: files,
+      );
+      return ExperiencePostModel.fromJson(response);
+    } catch (e) {
+      log(" experience API Error => $e");
+      rethrow;
+    }
+  }
+
+  //experice get All Data
+
+  Future<ExperienceGetAllDataModel> getAllExperience() async {
+    try {
+      final response = await _apiService.getApiWithToken(AppUrl.experiences);
+      print('response: $response');
+      if (response != null) {
+        return ExperienceGetAllDataModel.fromJson(response);
+      } else {
+        throw Exception('Failed to load data: response is null');
+      }
+    } catch (e) {
+      print('Error fetching  data: $e');
+      rethrow;
+    }
+  }
+//Bank Account Post Data
+
+  Future<BankAccountPostModel> bankAccountUpdateApi({
+    required String account_title,
+    required String bank_branch,
+    required String account_number,
+    required String bank_name,
+    required String bank_code,
+    required String account_type,
+
+  }) async {
+    try {
+      final Map<String, dynamic> body = {
+        "account_title": account_title,
+        "bank_branch": bank_branch,
+        "account_number": account_number,
+        "bank_name": bank_name,
+        "bank_code": bank_code,
+        "account_type": account_type,
+      };
+      final response = await _apiService.postApiWithToken(
+        body,
+        "${AppUrl.bankDetails}",
+      );
+
+      print('response: $response');
+
+      if (response != null) {
+        return BankAccountPostModel.fromJson(response);
+      } else {
+        throw Exception('Failed to load data: response is null');
+      }
+    } catch (e) {
+      print('Error sending data: $e');
+      rethrow;
+    }
+  }
+//get Bank Details
+  Future<GetBankAccountModel> getBankData() async {
+    try {
+      final response = await _apiService.getApiWithToken(AppUrl.bankDetails);
+      print('response: $response');
+      if (response != null) {
+        return GetBankAccountModel.fromJson(response);
+      } else {
+        throw Exception('Failed to load data: response is null');
+      }
+    } catch (e) {
+      print('Error fetching  data: $e');
+      rethrow;
+    }
+  }
+
+  //Change Password
+
+  Future<ChangePasswordDataModel> changePassword({
+    required String current_password,
+    required String new_password,
+
+  }) async {
+    try {
+      final Map<String, dynamic> body = {
+        "current_password": current_password,
+        "new_password": new_password,
+      };
+      final response = await _apiService.postApiWithToken(
+        body,
+        "${AppUrl.changePassword}",
+      );
+
+      print('response: $response');
+
+      if (response != null) {
+        return ChangePasswordDataModel.fromJson(response);
+      } else {
+        throw Exception('Failed to load data: response is null');
+      }
+    } catch (e) {
+      print('Error sending data: $e');
+      rethrow;
+    }
+  }
+
 
 }

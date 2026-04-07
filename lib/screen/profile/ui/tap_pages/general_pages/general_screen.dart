@@ -38,6 +38,8 @@ class _GeneralScreenState extends State<GeneralScreen> {
       Provider.of<ProfileProvider>(context, listen: false).getemergencyGetAllData();
       Provider.of<ProfileProvider>(context, listen: false).getAllDocument();
       Provider.of<ProfileProvider>(context, listen: false).getAllQualification();
+      Provider.of<ProfileProvider>(context, listen: false).getAllexperence();
+      Provider.of<ProfileProvider>(context, listen: false).getBankData();
     });
   }
   List<SocialProfile> socialProfiles = [];
@@ -52,13 +54,25 @@ class _GeneralScreenState extends State<GeneralScreen> {
     "email": "",
     "address": "",
   };
+  String maskAccountNumber(String accountNumber) {
+    if (accountNumber.isEmpty) return "";
 
+    if (accountNumber.length <= 4) {
+      return accountNumber;
+    }
+
+    String last4 = accountNumber.substring(accountNumber.length - 4);
+    String masked = "*" * (accountNumber.length - 4);
+
+    return "$masked$last4";
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer<ProfileProvider>(
         builder: (context, profileProvider, child) {
           return Column(
             children: [
+              //Basic Info
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: ShapeDecoration(
@@ -133,6 +147,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 ),
               ),
               SizedBox(height: 10),
+              //Emergency Contact
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -156,8 +171,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                           color: ColorResource.black,
                         ),
                         Spacer(),
-
-                        /// ADD BUTTON
                         GestureDetector(
                           onTap: () async {
                             final result = await Navigator.push(
@@ -166,8 +179,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                                 builder: (_) => const EmergencyContact(),
                               ),
                             );
-
-                            /// 🔥 Refresh after add
                             if (result != null && result is EmergencyContactData) {
                               setState(() {
                                 profileProvider
@@ -212,6 +223,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 ),
               ),
               SizedBox(height: 10,),
+              //Social Profile
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -312,6 +324,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 ),
               ),
               SizedBox(height: 10,),
+              //Document
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -371,7 +384,8 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: documentList.length,
+                          //itemCount: documentList.length ,
+                          itemCount:2 ,
                           itemBuilder: (context, index) {
                             final docData = documentList[index];
 
@@ -423,6 +437,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 ),
               ),
               SizedBox(height: 10,),
+              //Qualification
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -479,7 +494,8 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: educationList.length,
+                       // itemCount: educationList.length,
+                        itemCount: 2,
                         itemBuilder: (context, index) {
                           final item = educationList[index];
 
@@ -508,22 +524,12 @@ class _GeneralScreenState extends State<GeneralScreen> {
                       );
                     }
                   ),
-                  // CustomText(
-                  //   'MBA in Human Resources',
-                  //   size: 14,
-                  //   weight: FontWeight.w700,
-                  //   color: ColorResource.black,
-                  // ),
-                  // CustomText(
-                  //   'TechCorp Solutions • 2015 - 2018',
-                  //   size: 12,
-                  //   weight: FontWeight.w400,
-                  //   color: ColorResource.gray,
-                  // )
+
                 ],
               ),
               ),
               SizedBox(height: 10,),
+              //Work Experience
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -561,22 +567,60 @@ class _GeneralScreenState extends State<GeneralScreen> {
                     ],
                   ),
                   SizedBox(height: 10,),
-                  CustomText(
-                    'HR Manager',
-                    size: 14,
-                    weight: FontWeight.w700,
-                    color: ColorResource.black,
+                  Builder(
+                      builder: (context) {
+                        final experienceList =
+                            profileProvider.experienceGetAllDataModel?.data ?? [];
+
+                        if (experienceList.isEmpty) {
+                          return Center(
+                            child: CustomText(
+                              "No Experience available",
+                              size: 14,
+                              weight: FontWeight.w400,
+                              color: ColorResource.gray,
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                         // itemCount: experienceList.length,
+                          itemCount: 2,
+                          itemBuilder: (context, index) {
+                            final item = experienceList[index];
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                   item.post ?? "",
+                                    size: 14,
+                                    weight: FontWeight.w700,
+                                    color: ColorResource.black,
+                                  ),
+                                  CustomText(
+                                    "${item.companyName ?? ""} • ${item.fromYear?.split('-').last} - ${item.toYear?.split('-').last} ",
+                                    //'TechCorp Solutions • 2015 - 2018',
+                                    size: 12,
+                                    weight: FontWeight.w400,
+                                    color: ColorResource.gray,
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      }
                   ),
-                  CustomText(
-                    'TechCorp Solutions • 2015 - 2018',
-                    size: 12,
-                    weight: FontWeight.w400,
-                    color: ColorResource.gray,
-                  )
                 ],
               ),
               ),
               SizedBox(height: 10,),
+              //Bank Account
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -627,7 +671,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                             color: ColorResource.gray,
                           ),
                           CustomText(
-                            'BOI',
+                            profileProvider.getBankAccountModel?.data?.bankName ?? "",
                             size: 14,
                             weight: FontWeight.w700,
                             color: ColorResource.black,
@@ -644,8 +688,11 @@ class _GeneralScreenState extends State<GeneralScreen> {
                             weight: FontWeight.w400,
                             color: ColorResource.gray,
                           ),
+
                           CustomText(
-                            '**** 5678',
+                            maskAccountNumber(
+                              profileProvider.getBankAccountModel?.data?.accountNumber ?? "",
+                            ),
                             size: 14,
                             weight: FontWeight.w700,
                             color: ColorResource.black,
@@ -659,6 +706,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
               ),
               ),
               SizedBox(height: 10,),
+              //Change Password
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
