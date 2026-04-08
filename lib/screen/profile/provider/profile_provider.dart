@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../profile_view_all/model/delete_emergencymodel.dart';
 import '../model/bankAccountPostModel.dart';
 import '../model/chnagePasswordDataModel.dart';
 import '../model/document_delete_model.dart';
@@ -732,5 +733,42 @@ class ProfileProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Delete Emergency Model
+  DeleteEmergencyContactModel? deleteEmergencyContactModel;
+
+
+  Future<void> deleteEmergencyContact({required String id, bool isRefresh = false}) async {
+    loading = true;
+    notifyListeners();
+
+    try {
+      final response = await _repo.deleteEmergencyContact(id: id);
+
+      if (response != null) {
+        deleteEmergencyContactModel = response;
+      } else {
+        // fallback for APIs returning no content
+        documentDeleteModel = DocumentDeleteModel(
+          status: true,
+          message: 'Document deleted successfully',
+        );
+      }
+
+      if (isRefresh) {
+        await refreshDocumentList();
+      }
+    } catch (e) {
+      print("Delete Emergency API ERROR: $e");
+      deleteEmergencyContactModel = DeleteEmergencyContactModel(
+        status: false,
+        message: e.toString(),
+      );
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
 
 }

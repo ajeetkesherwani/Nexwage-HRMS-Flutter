@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../../../WebServices/app_url.dart';
 import '../../../WebServices/network/network_api_services.dart';
+import '../../profile_view_all/model/delete_emergencymodel.dart';
 import '../model/bankAccountPostModel.dart';
 import '../model/chnagePasswordDataModel.dart';
 import '../model/document_delete_model.dart';
@@ -563,6 +564,21 @@ class ProfileRepository {
       rethrow;
     }
   }
+//Delete Emergency Contact
 
+  Future<DeleteEmergencyContactModel> deleteEmergencyContact({required String id}) async {
+    try {
+      final response = await _apiService.deleteApiWithToken("${AppUrl.emergencyContactPost}/$id");
+
+      if (response == null || response.isEmpty) {
+        return DeleteEmergencyContactModel(status: true, message: 'Document deleted successfully');
+      }
+
+      return DeleteEmergencyContactModel.fromJson(response);
+    } catch (e) {
+      print('Error deleting document: $e');
+      rethrow;
+    }
+  }
 
 }

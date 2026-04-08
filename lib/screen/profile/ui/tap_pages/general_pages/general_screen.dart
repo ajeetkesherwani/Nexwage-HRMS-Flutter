@@ -12,7 +12,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../add_qualification/ui/add_qualification.dart';
 import '../../../../change_password/ui/change_password.dart';
+import '../../../../document/ui/document_downloadscreen.dart';
 import '../../../../document/ui/document_screen.dart';
+import '../../../../profile_view_all/ui/emergency_view_all.dart';
 import '../../../../update_bank_details/ui/update_bank_details.dart';
 import '../../../../work_experience/ui/work_experience.dart';
 import '../../../model/emergency_get_all_data_model.dart';
@@ -65,8 +67,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
     }
 
     String finalUrl = url.trim();
-
-    // If user saved only username or incomplete link, add https
     if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
       finalUrl = 'https://$finalUrl';
     }
@@ -76,7 +76,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
     try {
       final bool launched = await launchUrl(
         uri,
-        mode: LaunchMode.externalApplication, // opens in app/browser
+        mode: LaunchMode.externalApplication,
       );
 
       if (!launched) {
@@ -231,12 +231,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                      // itemCount: profileProvider.emergencyGetAllDataModel?.data?.length ?? 0,
                       itemCount: (profileProvider.emergencyGetAllDataModel?.data?.length ?? 0).clamp(0, 2),
                       itemBuilder: (context, index) {
-                        final item = profileProvider
-                            .emergencyGetAllDataModel
-                            ?.data?[index];
-
-
-
+                        final item = profileProvider.emergencyGetAllDataModel?.data?[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: emergencyCard(item!, index),
@@ -244,6 +239,21 @@ class _GeneralScreenState extends State<GeneralScreen> {
                       },
                     )
                         : CustomText('No contact added'),
+                    Row(mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: (){
+                            navPush(context: context, action: EmergencyViewAllScreen());
+                          },
+                          child: CustomText(
+                            'View All',
+                            size: 14,
+                            weight: FontWeight.w700,
+                            color: ColorResource.button1,
+                          ),
+                        )
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -359,7 +369,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                 ),
                 child: Column(
                   children: [
-                    // Header row with icon, title, and upload button
                     Row(
                       children: [
                         CustomImageView(
@@ -388,15 +397,10 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 10),
-
-                    // Null-safe ListView for documents
                     Builder(
                       builder: (context) {
-                        final documentList =
-                            profileProvider.getDocumentDataModel?.data ?? [];
-
+                        final documentList = profileProvider.getDocumentDataModel?.data ?? [];
                         if (documentList.isEmpty) {
                           return Center(
                             child: CustomText(
@@ -414,7 +418,6 @@ class _GeneralScreenState extends State<GeneralScreen> {
                           itemCount:2 ,
                           itemBuilder: (context, index) {
                             final docData = documentList[index];
-
                             return Container(
                               width: double.infinity,
                               margin: const EdgeInsets.only(bottom: 8),
@@ -442,8 +445,8 @@ class _GeneralScreenState extends State<GeneralScreen> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      // Handle download or tap action here
                                       print('Tapped download for ${docData.documentFile}');
+                                      DocumentDownload.downloadFile(context, docData.documentFile ?? "");
                                     },
                                     child: CustomImageView(
                                       imagePath: AppImages.download,
