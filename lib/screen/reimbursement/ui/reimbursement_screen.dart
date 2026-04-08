@@ -16,14 +16,14 @@ class ReimbursementScreen extends StatefulWidget {
 }
 
 class _ReimbursementScreenState extends State<ReimbursementScreen> {
-  int selectedIndex = 0;
-
-  final List<FilterItem> filters = [
-    FilterItem(title: "All", icon: Icons.list),
-    FilterItem(title: "Travel", icon: Icons.flight),
-    FilterItem(title: "Food", icon: Icons.restaurant),
-    FilterItem(title: "Medical", icon: Icons.local_hospital),
-  ];
+  // int selectedIndex = 0;
+  //
+  // final List<FilterItem> filters = [
+  //   FilterItem(title: "All", icon: Icons.list),
+  //   FilterItem(title: "Travel", icon: Icons.flight),
+  //   FilterItem(title: "Food", icon: Icons.restaurant),
+  //   FilterItem(title: "Medical", icon: Icons.local_hospital),
+  // ];
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -35,88 +35,88 @@ class _ReimbursementScreenState extends State<ReimbursementScreen> {
             children: [
               Container(
                 height: double.infinity,
-                child: SingleChildScrollView(
-                  child: Padding(
-                      padding: EdgeInsets.all(15),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 30,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: filters.length,
-                            itemBuilder: (context, index) {
-                              bool isSelected = selectedIndex == index;
-
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    selectedIndex = index;
-                                  });
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 10),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      width: 1,
-                                      color: const Color(0xFFE2E8F0),
-                                    ),
-                                    color: isSelected
-                                        ? ColorResource.button1
-                                        : ColorResource.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Center(
-                                      child:
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            filters[index].icon,
-                                            color: isSelected ? ColorResource.white : ColorResource.black,
-                                            size: 18,
-                                          ),
-                                          SizedBox(width: 5),
-                                          CustomText(
-                                            filters[index].title,
-                                            size: 14,
-                                            weight: FontWeight.w500,
-                                            color: isSelected
-                                                ? ColorResource.white
-                                                : ColorResource.black,
-                                          ),
-                                        ],
-                                      )
-                                  ),
-                                ),
-                              );
-                            },
+                child: Padding(
+                    padding: EdgeInsets.all(15),
+                  child: Column(
+                    children: [
+                      // Container(
+                      //   height: 30,
+                      //   child: ListView.builder(
+                      //     scrollDirection: Axis.horizontal,
+                      //     itemCount: filters.length,
+                      //     itemBuilder: (context, index) {
+                      //       bool isSelected = selectedIndex == index;
+                      //
+                      //       return GestureDetector(
+                      //         onTap: () {
+                      //           setState(() {
+                      //             selectedIndex = index;
+                      //           });
+                      //         },
+                      //         child: Container(
+                      //           margin: const EdgeInsets.only(right: 10),
+                      //           padding: const EdgeInsets.symmetric(
+                      //               horizontal: 10, vertical: 3),
+                      //           decoration: BoxDecoration(
+                      //             border: Border.all(
+                      //               width: 1,
+                      //               color: const Color(0xFFE2E8F0),
+                      //             ),
+                      //             color: isSelected
+                      //                 ? ColorResource.button1
+                      //                 : ColorResource.white,
+                      //             borderRadius: BorderRadius.circular(20),
+                      //           ),
+                      //           child: Center(
+                      //               child:
+                      //               Row(
+                      //                 children: [
+                      //                   Icon(
+                      //                     filters[index].icon,
+                      //                     color: isSelected ? ColorResource.white : ColorResource.black,
+                      //                     size: 18,
+                      //                   ),
+                      //                   SizedBox(width: 5),
+                      //                   CustomText(
+                      //                     filters[index].title,
+                      //                     size: 14,
+                      //                     weight: FontWeight.w500,
+                      //                     color: isSelected
+                      //                         ? ColorResource.white
+                      //                         : ColorResource.black,
+                      //                   ),
+                      //                 ],
+                      //               )
+                      //           ),
+                      //         ),
+                      //       );
+                      //     },
+                      //   ),
+                      // ),
+                      SizedBox(height: 15,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomText(
+                            'Recent Claims',
+                            size: 16,
+                            weight: FontWeight.w700,
+                            color: ColorResource.black,
                           ),
-                        ),
-                        SizedBox(height: 15,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CustomText(
-                              'Recent Claims',
-                              size: 16,
-                              weight: FontWeight.w700,
-                              color: ColorResource.black,
-                            ),
-                            CustomText(
-                              'View All',
-                              size: 14,
-                              weight: FontWeight.w600,
-                              color: ColorResource.button1,
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-                    ListView.builder(
-                      itemCount: 15,
+                          CustomText(
+                            'View All',
+                            size: 14,
+                            weight: FontWeight.w600,
+                            color: ColorResource.button1,
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 10,),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 20,
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics:  BouncingScrollPhysics(),
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10.0),
@@ -131,8 +131,8 @@ class _ReimbursementScreenState extends State<ReimbursementScreen> {
                         );
                       },
                     ),
-                      ],
-                    ),
+                  ),
+                    ],
                   ),
                 ),
               ),

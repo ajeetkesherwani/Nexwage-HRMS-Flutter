@@ -28,16 +28,25 @@ class Data {
   String? firstName;
   String? lastName;
   String? email;
+  String? profilePhoto;
   String? staffId;
   String? phone;
   String? gender;
   String? dateOfBirth;
+  String? address;
   String? dateOfBirthFormatted;
+  String? maritalStatus;
+  String? bloodGrp;
+  String? skypeId;
+  String? fbId;
+  String? twitterId;
+  String? linkedInId;
+  String? whatsappId;
   Department? department;
   Designation? designation;
   Company? company;
   OfficeShift? officeShift;
-  Null? locationId;
+  String? locationId;
   int? isActive;
   String? joiningDate;
 
@@ -47,11 +56,20 @@ class Data {
         this.firstName,
         this.lastName,
         this.email,
+        this.profilePhoto,
         this.staffId,
         this.phone,
         this.gender,
         this.dateOfBirth,
+        this.address,
         this.dateOfBirthFormatted,
+        this.maritalStatus,
+        this.bloodGrp,
+        this.skypeId,
+        this.fbId,
+        this.twitterId,
+        this.linkedInId,
+        this.whatsappId,
         this.department,
         this.designation,
         this.company,
@@ -66,11 +84,20 @@ class Data {
     firstName = json['first_name'];
     lastName = json['last_name'];
     email = json['email'];
+    profilePhoto = json['profile_photo'];
     staffId = json['staff_id'];
     phone = json['phone'];
     gender = json['gender'];
     dateOfBirth = json['date_of_birth'];
+    address = json['address'];
     dateOfBirthFormatted = json['date_of_birth_formatted'];
+    maritalStatus = json['marital_status'];
+    bloodGrp = json['blood_grp'];
+    skypeId = json['skype_id'];
+    fbId = json['fb_id'];
+    twitterId = json['twitter_id'];
+    linkedInId = json['linkedIn_id'];
+    whatsappId = json['whatsapp_id'];
     department = json['department'] != null
         ? new Department.fromJson(json['department'])
         : null;
@@ -94,11 +121,20 @@ class Data {
     data['first_name'] = this.firstName;
     data['last_name'] = this.lastName;
     data['email'] = this.email;
+    data['profile_photo'] = this.profilePhoto;
     data['staff_id'] = this.staffId;
     data['phone'] = this.phone;
     data['gender'] = this.gender;
     data['date_of_birth'] = this.dateOfBirth;
+    data['address'] = this.address;
     data['date_of_birth_formatted'] = this.dateOfBirthFormatted;
+    data['marital_status'] = this.maritalStatus;
+    data['blood_grp'] = this.bloodGrp;
+    data['skype_id'] = this.skypeId;
+    data['fb_id'] = this.fbId;
+    data['twitter_id'] = this.twitterId;
+    data['linkedIn_id'] = this.linkedInId;
+    data['whatsapp_id'] = this.whatsappId;
     if (this.department != null) {
       data['department'] = this.department!.toJson();
     }

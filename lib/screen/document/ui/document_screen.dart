@@ -346,23 +346,7 @@ int? selectedDocumentId;
 
                               print("Downloading ${docData.id}");
                             },
-                            // onTapDelete: () async {
-                            //   print("Deleting ");
-                            //   print(docData.id);
-                            //
-                            //   if (docData.id != null) {
-                            //     print("Deleting document with ID: ${docData.id}");
-                            //
-                            //     // Call provider to delete document
-                            //     await context.read<ProfileProvider>().deleteDocument(id: "${docData.id}");
-                            //
-                            //     // Optional: show a snackbar for feedback
-                            //     final result = context.read<ProfileProvider>().documentDeleteModel;
-                            //     ScaffoldMessenger.of(context).showSnackBar(
-                            //       SnackBar(content: Text(result?.message ?? 'Action completed')),
-                            //     );
-                            //   }
-                            // },
+
                             onTapDelete: () async {
                               final docId = docData.id;
                               if (docId == null) return;

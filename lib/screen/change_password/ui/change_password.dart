@@ -161,13 +161,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                               },
                           ),
                           SizedBox(height: 10,),
-                          CommonAppButton(
-                              text: 'Cancel',
-                              backgroundColor1: ColorResource.white,
-                              backgroundColor2: ColorResource.white,
-                              textColor: ColorResource.gray,
-                              onPressed: (){}
-                          ),
+
                         ],
                       ),
                     ),

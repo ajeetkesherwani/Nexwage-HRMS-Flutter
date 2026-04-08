@@ -40,6 +40,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
       Provider.of<ProfileProvider>(context, listen: false).getAllQualification();
       Provider.of<ProfileProvider>(context, listen: false).getAllexperence();
       Provider.of<ProfileProvider>(context, listen: false).getBankData();
+      Provider.of<ProfileProvider>(context, listen: false).getAllexperence();
     });
   }
   List<SocialProfile> socialProfiles = [];
@@ -54,6 +55,41 @@ class _GeneralScreenState extends State<GeneralScreen> {
     "email": "",
     "address": "",
   };
+
+  Future<void> openSocialLink(String? url, BuildContext context) async {
+    if (url == null || url.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Link not available")),
+      );
+      return;
+    }
+
+    String finalUrl = url.trim();
+
+    // If user saved only username or incomplete link, add https
+    if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+      finalUrl = 'https://$finalUrl';
+    }
+
+    final Uri uri = Uri.parse(finalUrl);
+
+    try {
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication, // opens in app/browser
+      );
+
+      if (!launched) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not open link")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid or unsupported link")),
+      );
+    }
+  }
   String maskAccountNumber(String accountNumber) {
     if (accountNumber.isEmpty) return "";
 
@@ -96,19 +132,8 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         ),
                         Spacer(),
                         GestureDetector(
-                          onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => BasicInfoEditPage(data: userData),
-                              ),
-                            );
-
-                            if (result != null) {
-                              setState(() {
-                                userData = result;
-                              });
-                            }
+                          onTap: (){
+                            navPush(context: context, action: BasicInfoEditPage());
                           },
                           child: CustomText(
                             'Edit',
@@ -128,7 +153,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                           children: [
                             titleCard("Full Name", profileProvider.getProfileModel?.data?.fullName ?? ""),
                             titleCard("DOB", profileProvider.getProfileModel?.data?.dateOfBirth ?? ""),
-                            titleCard("Marital Status", userData["marital"]),
+                            titleCard("Marital Status", profileProvider.getProfileModel?.data?.maritalStatus ?? ""),
                           ],
                         ),
                         Column(
@@ -136,13 +161,13 @@ class _GeneralScreenState extends State<GeneralScreen> {
                           children: [
                             titleCard("Gender", profileProvider.getProfileModel?.data?.gender ?? ""),
                             titleCard("Phone", profileProvider.getProfileModel?.data?.phone ?? ""),
-                            titleCard("Blood Group", userData["blood"]),
+                            titleCard("Blood Group", profileProvider.getProfileModel?.data?.bloodGrp ?? ""),
                           ],
                         ),
                       ],
                     ),
                     titleCard("Email", profileProvider.getProfileModel?.data?.email ?? ""),
-                    titleCard("Address", userData["address"]),
+                    titleCard("Address", profileProvider.getProfileModel?.data?.address ?? ""),
                   ],
                 ),
               ),
@@ -231,6 +256,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
+
                   children: [
                     Row(
                       children: [
@@ -246,60 +272,60 @@ class _GeneralScreenState extends State<GeneralScreen> {
                     ),
                     SizedBox(height: 10,),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ...socialProfiles.map((profile) {
-                          return GestureDetector(
-                            onTap: () async {
-                              final updated = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => AddEditSocialScreen(profile: profile),
-                                ),
-                              );
-                              if (updated != null) {
-                                setState(() {
-                                  int index = socialProfiles.indexOf(profile);
-                                  socialProfiles[index] = updated;
-                                });
-                              }
-                            },
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(6),
-                                    color: ColorResource.searchBar,
-                                  ),
-                                  child: CustomImageView(
-                                    imagePath: profile.image,
-                                    height: 23,
-                                    width: 23,
-                                  ),
-                                ),
-                                CustomText(
-                                  profile.name,
-                                  size: 10,
-                                )
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: () async {
-                            final newProfile = await Navigator.push(
+                        socialProfile(
+                          name: 'Facebook',
+                          onTap: () {
+                            openSocialLink(
+                              profileProvider.getProfileModel?.data?.fbId,
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => AddEditSocialScreen(),
-                              ),
                             );
+                          },
+                        ),
 
-                            if (newProfile != null) {
-                              setState(() {
-                                socialProfiles.add(newProfile);
-                              });
-                            }
+                        socialProfile(
+                          name: 'Twitter',
+                          onTap: () {
+                            openSocialLink(
+                              profileProvider.getProfileModel?.data?.twitterId,
+                              context,
+                            );
+                          },
+                        ),
+
+                        socialProfile(
+                          name: 'LinkedIn',
+                          onTap: () {
+                            openSocialLink(
+                              profileProvider.getProfileModel?.data?.linkedInId,
+                              context,
+                            );
+                          },
+                        ),
+
+                        socialProfile(
+                          name: 'WhatsApp',
+                          onTap: () {
+                            openSocialLink(
+                              profileProvider.getProfileModel?.data?.whatsappId,
+                              context,
+                            );
+                          },
+                        ),
+
+                        socialProfile(
+                          name: 'Skype',
+                          onTap: () {
+                            openSocialLink(
+                              profileProvider.getProfileModel?.data?.skypeId,
+                              context,
+                            );
+                          },
+                        ),
+                        GestureDetector(
+                          onTap: (){
+                            navPush(context: context, action: AddEditSocialScreen());
                           },
                           child: Column(
                             children: [
@@ -828,6 +854,31 @@ class _GeneralScreenState extends State<GeneralScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget socialProfile({
+    required String name,
+    required VoidCallback onTap,
+}){
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            color: ColorResource.searchBar,
+          ),
+          child: GestureDetector(
+            onTap: onTap,
+            child: Icon(Icons.link, color: ColorResource.gray),
+          ),
+        ),
+        CustomText(
+          name,
+          size: 10,
+        )
+      ],
     );
   }
 }

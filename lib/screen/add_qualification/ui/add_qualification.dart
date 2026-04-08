@@ -346,14 +346,7 @@ class _AddQualificationState extends State<AddQualification> {
                             }
                         ),
                         SizedBox(height: 10,),
-                        CommonAppButton(
-                            backgroundColor1: ColorResource.white,
-                            backgroundColor2: ColorResource.white,
-                            textColor: ColorResource.gray,
-                            borderColor: ColorResource.grayText,
-                            text: 'Cancel',
-                            onPressed: (){}
-                        ),
+
                       ],
                     ),
                   ),

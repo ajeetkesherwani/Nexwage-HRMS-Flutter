@@ -15,6 +15,8 @@ import '../model/experienceGetAllDataModel.dart';
 import '../model/getBankDataModel.dart';
 import '../model/getDocumentDataModel.dart';
 import '../model/get_profile_model.dart';
+import '../model/postProfileDataModel.dart';
+import '../model/postSocialModel.dart';
 import '../model/qualificationGetDataModel.dart';
 import '../repo/profile_repo.dart';
 
@@ -477,7 +479,7 @@ class ProfileProvider with ChangeNotifier {
      loading = true;
      notifyListeners();
      try {
-       qualificationGetDataModel = await _repo.getAllQualification();
+       experienceGetAllDataModel = await _repo.getAllExperience();
      } catch (e) {
        print("ReservedRides API ERROR: $e");
      }
@@ -610,5 +612,125 @@ class ProfileProvider with ChangeNotifier {
        notifyListeners();
      }
    }
+// Post Profile Details
+  Future<bool> postProfileDetails({
+    required String first_name,
+    required String last_name,
+    File? profile_photo,
+  }) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final response = await _repo.postProfileDetails(
+        first_name: first_name,
+        last_name: last_name,
+        profile_photo: profile_photo,
+      );
+
+      print("API Response Status: ${response.status}");
+      print("API Response Message: ${response.message}");
+
+      if (response.status == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print("Experience Post Error: $e");
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  //Post Basic Details
+
+
+  PostProfileDataModel? postProfileDataModel;
+
+  Future<bool> postBasicDetails({
+    required String firstName,
+    required String lastName,
+    required String gender,
+    required String dateOfBirth,
+    required String contactNo,
+    required String maritalStatus,
+    required String bloodGrp,
+    required String email,
+    required String address,
+  }) async {
+    isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      postProfileDataModel = await _repo.postBasicDetails(
+        first_name: firstName,
+        last_name: lastName,
+        gender: gender,
+        date_of_birth: dateOfBirth,
+        contact_no: contactNo,
+        marital_status: maritalStatus,
+        blood_grp: bloodGrp,
+        email: email,
+        address: address,
+      );
+
+      print("UPDATE SUCCESS RESPONSE: $postProfileDataModel");
+
+      _clearFields();
+
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll("Exception: ", "");
+      print("ERROR: $_error");
+
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  //Post Social Link
+
+  PostSocialModel?postSocialModel;
+  Future<bool> postSocialLink({
+    required String fb_id,
+    required String twitter_id,
+    required String linkedIn_id,
+    required String whatsapp_id,
+    required String skype_id,
+  }) async {
+    isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      postSocialModel = await _repo.postSocial(
+         fb_id: fb_id,
+        twitter_id: twitter_id,
+        linkedIn_id: linkedIn_id,
+        whatsapp_id: whatsapp_id,
+        skype_id: skype_id,
+      );
+
+      print("UPDATE SUCCESS RESPONSE: $postProfileDataModel");
+
+      _clearFields();
+
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll("Exception: ", "");
+      print("ERROR: $_error");
+
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 
 }

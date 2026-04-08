@@ -17,6 +17,8 @@ import '../model/experiencePostModel.dart';
 import '../model/getBankDataModel.dart';
 import '../model/getDocumentDataModel.dart';
 import '../model/get_profile_model.dart';
+import '../model/postProfileDataModel.dart';
+import '../model/postSocialModel.dart';
 import '../model/qualificationGetDataModel.dart';
 import '../model/qualification_post_model.dart';
 
@@ -429,6 +431,130 @@ class ProfileRepository {
 
       if (response != null) {
         return ChangePasswordDataModel.fromJson(response);
+      } else {
+        throw Exception('Failed to load data: response is null');
+      }
+    } catch (e) {
+      print('Error sending data: $e');
+      rethrow;
+    }
+  }
+
+
+  //Post Profile Details
+
+
+  Future<PostProfileDataModel> postProfileDetails({
+    required String first_name,
+    required String last_name,
+    File? profile_photo,
+    String? oldProfileImage,
+  }) async {
+    final url = AppUrl.getProfile;
+
+    try {
+      final fields = {
+        "first_name": first_name,
+        "last_name": last_name,
+      };
+
+      if (profile_photo == null && oldProfileImage != null) {
+        fields["attachment"] = oldProfileImage;
+      }
+      final files = <String, File>{};
+      if (profile_photo != null) {
+        files["attachment"] = profile_photo;
+      }
+      if (kDebugMode) {
+        log(" Fields => $fields");
+        log(" Files => ${files.keys}");
+      }
+
+      final response =
+      await _apiService.postMultipartApiWithToken(
+        url: url,
+        fields: fields,
+        files: files,
+      );
+      return PostProfileDataModel.fromJson(response);
+    } catch (e) {
+      log(" experience API Error => $e");
+      rethrow;
+    }
+  }
+
+  //Post Basic Details
+
+  Future<PostProfileDataModel> postBasicDetails({
+    required String first_name,
+    required String last_name,
+    required String gender,
+    required String date_of_birth,
+    required String contact_no,
+    required String marital_status,
+    required String blood_grp,
+    required String email,
+    required String address,
+
+  }) async {
+    try {
+      final Map<String, dynamic> body = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "gender": gender,
+        "date_of_birth": date_of_birth,
+        "contact_no": contact_no,
+        "marital_status": marital_status,
+        "blood_grp": blood_grp,
+        "email": email,
+        "address": address,
+
+      };
+      final response = await _apiService.postApiWithToken(
+        body,
+        "${AppUrl.getProfile}",
+      );
+
+      print('response: $response');
+
+      if (response != null) {
+        return PostProfileDataModel.fromJson(response);
+      } else {
+        throw Exception('Failed to load data: response is null');
+      }
+    } catch (e) {
+      print('Error sending data: $e');
+      rethrow;
+    }
+  }
+
+  //Edit Social
+  Future<PostSocialModel> postSocial({
+    required String fb_id,
+    required String twitter_id,
+    required String linkedIn_id,
+    required String whatsapp_id,
+    required String skype_id,
+
+  }) async {
+    try {
+      final Map<String, dynamic> body = {
+        "fb_id": fb_id,
+        "twitter_id": twitter_id,
+        "linkedIn_id": linkedIn_id,
+        "whatsapp_id": whatsapp_id,
+        "skype_id": skype_id,
+
+      };
+      final response = await _apiService.postApiWithToken(
+        body,
+        "${AppUrl.getProfile}",
+      );
+
+      print('response: $response');
+
+      if (response != null) {
+        return PostSocialModel.fromJson(response);
       } else {
         throw Exception('Failed to load data: response is null');
       }

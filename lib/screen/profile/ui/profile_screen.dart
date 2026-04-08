@@ -28,26 +28,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     Future.microtask(() {
       Provider.of<ProfileProvider>(context, listen: false).getProfileData();
+      Provider.of<ProfileProvider>(context, listen: false).getemergencyGetAllData();
+      Provider.of<ProfileProvider>(context, listen: false).getAllDocument();
+      Provider.of<ProfileProvider>(context, listen: false).getAllQualification();
+      Provider.of<ProfileProvider>(context, listen: false).getAllexperence();
+      Provider.of<ProfileProvider>(context, listen: false).getBankData();
+      Provider.of<ProfileProvider>(context, listen: false).getAllexperence();
     });
   }
   String? name;
   String? title;
   File? profileImage;
 
-  Future<void> openEditProfile() async {
-    final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileImageEdit()),);
-
-    if (result != null) {
-      setState(() {
-        name = result['name'];
-        title = result['title'];
-
-        if (result['image'] != null) {
-          profileImage = File(result['image']);
-        }
-      });
-    }
-  }
   int selectedTab = 0;
   bool isRefreshing = false;
   final List<String> tabs = ["General", "Salary", "Core HR"];
@@ -56,8 +48,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       isRefreshing = true;
     });
 
-    await Provider.of<ProfileProvider>(context, listen: false)
-        .getProfileData(isRefresh: true);
+    await Provider.of<ProfileProvider>(context, listen: false).getProfileData(isRefresh: true);
+    Provider.of<ProfileProvider>(context, listen: false).getemergencyGetAllData(isRefresh: true);
+    Provider.of<ProfileProvider>(context, listen: false).getAllDocument(isRefresh: true);
+    Provider.of<ProfileProvider>(context, listen: false).getAllQualification(isRefresh: true);
+    Provider.of<ProfileProvider>(context, listen: false).getAllexperence(isRefresh: true);
+    Provider.of<ProfileProvider>(context, listen: false).getBankData(isRefresh: true);
+    Provider.of<ProfileProvider>(context, listen: false).getAllexperence(isRefresh: true);
 
     setState(() {
       isRefreshing = false;
@@ -67,6 +64,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Consumer<ProfileProvider>(
         builder: (context, profileProvider, child) {
+          final String? apiImage =
+              profileProvider.getProfileModel?.data?.profilePhoto;
           return  SafeArea(
             top: false,
             child: Scaffold(
@@ -92,35 +91,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Center(
                               child: Stack(
                                 children: [
-                                  Container(
-                                    width: 128,
-                                    height: 128,
-                                    decoration: ShapeDecoration(
-                                      image: profileImage != null
-                                          ? DecorationImage(
-                                        image: FileImage(profileImage!),
-                                        fit: BoxFit.cover,
-                                      )
-                                          : null,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                          width: 4,
-                                          color: const Color(0x191D4FD7),
-                                        ),
-                                        borderRadius: BorderRadius.circular(9999),
-                                      ),
-                                    ),
 
-                                    child: profileImage == null
-                                        ? Icon(Icons.person, size: 60, color: Colors.grey)
-                                        : null,
-                                  ),
+
+                          Container(
+                          width: 128,
+                          height: 128,
+                          decoration: ShapeDecoration(
+                            image: profileImage != null
+                                ? DecorationImage(
+                              image: FileImage(profileImage!),
+                              fit: BoxFit.cover,
+                            )
+                                : (apiImage != null && apiImage.isNotEmpty)
+                                ? DecorationImage(
+                              image: NetworkImage(apiImage),
+                              fit: BoxFit.cover,
+                            )
+                                : null,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                width: 4,
+                                color: const Color(0x191D4FD7),
+                              ),
+                              borderRadius: BorderRadius.circular(9999),
+                            ),
+                          ),
+                          child: (profileImage == null && (apiImage == null || apiImage.isEmpty))
+                              ? Icon(Icons.person, size: 60, color: Colors.grey)
+                              : null,
+                        ),
 
                                   Positioned(
                                     bottom: 4,
                                     right: 4,
                                     child: GestureDetector(
-                                      onTap: openEditProfile,
+                                      onTap: (){
+                                        navPush(context: context, action: ProfileImageEdit());
+                                      },
                                       child: Container(
                                         padding: EdgeInsets.all(6),
                                         decoration: BoxDecoration(

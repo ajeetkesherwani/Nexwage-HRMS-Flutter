@@ -147,16 +147,7 @@ class _EmergencyContactEditScreenState extends State<EmergencyContactEditScreen>
                         },
                       ),
                       SizedBox(height: 10,),
-                      CommonAppButton(
-                          text: 'Cancel',
-                          textColor: ColorResource.gray,
-                          backgroundColor1: ColorResource.white,
-                          backgroundColor2: ColorResource.white,
-                          borderColor: ColorResource.button1,
-                          onPressed: (){
-                            Navigator.pop(context);
-                          }
-                      ),
+
 
 
                     ],
