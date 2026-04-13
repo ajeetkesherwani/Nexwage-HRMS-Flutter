@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexwage/screen/profile/provider/profile_provider.dart';
@@ -37,10 +36,9 @@ class _WorkExperienceState extends State<WorkExperience> {
     }
   }
 
-  // Pick image from gallery or camera
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
-    XFile? image = await picker.pickImage(source: ImageSource.gallery); // or camera
+    XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         selectedFile = File(image.path);
@@ -268,23 +266,6 @@ class _WorkExperienceState extends State<WorkExperience> {
                           maxLines: 5,
                         ),
                         SizedBox(height: 20,),
-                        // CommonAppButton(
-                        //     text: 'Save Experience',
-                        //     backgroundColor1: ColorResource.button1,
-                        //     backgroundColor2: ColorResource.button1,
-                        //     isLoading: provider.isLoading,
-                        //     onPressed: (){
-                        //       provider.experiencePostData(
-                        //         company_name: companyController.text.trim(),
-                        //         post: designationController.text.trim(),
-                        //         from_date: startDateController.text.trim(),
-                        //         to_date: endDateController.text.trim(),
-                        //         remark: remarkController.text.trim(),
-                        //         attachment: selectedFile,
-                        //       );
-                        //     }
-                        // ),
-
                         CommonAppButton(
                           text: 'Save Experience',
                           backgroundColor1: ColorResource.button1,
@@ -316,13 +297,6 @@ class _WorkExperienceState extends State<WorkExperience> {
                           },
                         ),
                         SizedBox(height: 10,),
-                        CommonAppButton(
-                            text: 'Cancel',
-                            backgroundColor1: ColorResource.white,
-                            backgroundColor2: ColorResource.white,
-                            textColor: ColorResource.button1,
-                            onPressed: (){}
-                        )
                       ],
                     ),
                   ),

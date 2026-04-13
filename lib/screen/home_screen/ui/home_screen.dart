@@ -446,105 +446,112 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: SizedBox(
                           height: MediaQuery.of(context).size.height * 0.9,
                           width: MediaQuery.of(context).size.width,
-                          child: SingleChildScrollView(
-                            physics: BouncingScrollPhysics(),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(15),
-                                  decoration: ShapeDecoration(
-                                    color: ColorResource.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(15),
+                                decoration: ShapeDecoration(
+                                  color: ColorResource.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  shadows: [
+                                    BoxShadow(
+                                      color: Color(0x3F000000),
+                                      blurRadius: 18.40,
+                                      offset: Offset(19, -5),
+                                      spreadRadius: 0,
                                     ),
-                                    shadows: [
-                                      BoxShadow(
-                                        color: Color(0x3F000000),
-                                        blurRadius: 18.40,
-                                        offset: Offset(19, -5),
-                                        spreadRadius: 0,
+                                  ],
+                                ),
+
+                                child: buildCardItem(
+                                  timer: timerText,
+                                  shiftStatus: isPunchedIn ? "ON SHIFT" : "OFF SHIFT",
+                                  buttonText: isPunchedIn ? "Clock-Out" : "Clock-In",
+                                  shift: "Shift ${formatTime(attendanceProvider.shiftStart ?? "09:00")} - ""${formatTime(attendanceProvider.shiftEnd ?? "18:00")}",
+                                  onTap: isPunchedIn ? () {punchOut(context);} : () {getLocationData(context);},
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      hedingTitle(title: 'Reporting Head'),
+                                      SizedBox(height: 10),
+                                      reportHead(
+                                        title: homeProvder.homeModel?.data?.reportingHead?.name ?? "N/A",
+                                        subTitle: homeProvder.homeModel?.data?.reportingHead?.designation ?? "N/A",
+                                        email: homeProvder.homeModel?.data?.reportingHead?.email ?? "N/A",
+                                        mobileNumber: '+91 ${homeProvder.homeModel?.data?.reportingHead?.phone ?? "N/A"}',
                                       ),
+                                      SizedBox(height: 10),
+                                      hedingTitle(title: 'Main Menu'),
+                                      SizedBox(height: 10),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                        children: [
+                                          mainMenu(
+                                            onTap: () {
+                                              navPush(context: context, action: HrReportsScreen(),);
+                                            },
+                                            title: 'HR REPORTS', image: AppImages.hrReport, color: ColorResource.menu1,
+                                          ),
+                                          mainMenu(
+                                            onTap: () {
+                                              navPush(context: context, action: HolidaysScreen(),);
+                                            },
+                                            title: 'HOLIDAYS', image: AppImages.holiday, color: ColorResource.menu2,
+                                          ),
+                                          mainMenu(
+                                            onTap: () {
+                                              navPush(context: context, action: ReimbursementScreen(),);
+                                            },
+                                            title: 'REIMBURSEMENT', image: AppImages.remebe, color: ColorResource.menu3,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 15),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                        children: [
+                                          mainMenu(
+                                            onTap: () {
+                                              navPush(context: context, action: ProjectScreen(),);
+                                            },
+                                            title: 'PROJECTS', image: AppImages.project, color: ColorResource.menu4,
+                                          ),
+                                          mainMenu(
+                                            onTap: () {
+                                              navPush(context: context, action: TicketScreen(),);
+                                            },
+                                            title: 'TICKETS', image: AppImages.ticket, color: ColorResource.menu5,
+                                          ),
+                                          mainMenu(
+                                            onTap: () {
+                                              navPush(context: context, action: TasksScreen(),);
+                                            },
+                                            title: 'TASKS', image: AppImages.task, color: ColorResource.menu6,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 10),
+                                      hedingTitle(title: 'Announcements'),
+                                      SizedBox(height: 10),
+                                      Announecement(
+                                        image: AppImages.announcement,
+                                        title: 'Townhall Meeting Today',
+                                        subTitle: 'Join at 4:00 PM in the Main\nCafeteria',
+                                      ),
+                                      SizedBox(height: 10,)
                                     ],
                                   ),
-
-                                  child: buildCardItem(
-                                    timer: timerText,
-                                    shiftStatus: isPunchedIn ? "ON SHIFT" : "OFF SHIFT",
-                                    buttonText: isPunchedIn ? "Clock-Out" : "Clock-In",
-                                    shift: "Shift ${formatTime(attendanceProvider.shiftStart ?? "09:00")} - ""${formatTime(attendanceProvider.shiftEnd ?? "18:00")}",
-                                    onTap: isPunchedIn ? () {punchOut(context);} : () {getLocationData(context);},
-                                  ),
                                 ),
-                                SizedBox(height: 10),
-                                hedingTitle(title: 'Reporting Head'),
-                                SizedBox(height: 10),
-                                reportHead(
-                                  title: homeProvder.homeModel?.data?.reportingHead?.name ?? "N/A",
-                                  subTitle: homeProvder.homeModel?.data?.reportingHead?.designation ?? "N/A",
-                                  email: homeProvder.homeModel?.data?.reportingHead?.email ?? "N/A",
-                                  mobileNumber: '+91 ${homeProvder.homeModel?.data?.reportingHead?.phone ?? "N/A"}',
-                                ),
-                                SizedBox(height: 10),
-                                hedingTitle(title: 'Main Menu'),
-                                SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    mainMenu(
-                                      onTap: () {
-                                        navPush(context: context, action: HrReportsScreen(),);
-                                      },
-                                      title: 'HR REPORTS', image: AppImages.hrReport, color: ColorResource.menu1,
-                                    ),
-                                    mainMenu(
-                                      onTap: () {
-                                        navPush(context: context, action: HolidaysScreen(),);
-                                      },
-                                      title: 'HOLIDAYS', image: AppImages.holiday, color: ColorResource.menu2,
-                                    ),
-                                    mainMenu(
-                                      onTap: () {
-                                        navPush(context: context, action: ReimbursementScreen(),);
-                                      },
-                                      title: 'REIMBURSEMENT', image: AppImages.remebe, color: ColorResource.menu3,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 15),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    mainMenu(
-                                      onTap: () {
-                                        navPush(context: context, action: ProjectScreen(),);
-                                      },
-                                      title: 'PROJECTS', image: AppImages.project, color: ColorResource.menu4,
-                                    ),
-                                    mainMenu(
-                                      onTap: () {
-                                        navPush(context: context, action: TicketScreen(),);
-                                      },
-                                      title: 'TICKETS', image: AppImages.ticket, color: ColorResource.menu5,
-                                    ),
-                                    mainMenu(
-                                      onTap: () {
-                                        navPush(context: context, action: TasksScreen(),);
-                                      },
-                                      title: 'TASKS', image: AppImages.task, color: ColorResource.menu6,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
-                                hedingTitle(title: 'Announcements'),
-                                SizedBox(height: 10),
-                                Announecement(
-                                  image: AppImages.announcement,
-                                  title: 'Townhall Meeting Today',
-                                  subTitle: 'Join at 4:00 PM in the Main\nCafeteria',
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

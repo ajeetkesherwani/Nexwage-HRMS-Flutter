@@ -371,11 +371,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     restoreShiftAndTimer();
     return Consumer<AttendanceProvider>(
       builder: (context, attendanceProvider, child) {
-        // final duration = attendanceProvider.duration;
-        // String twoDigits(int n) => n.toString().padLeft(2, '0');
-        // final hours = twoDigits(duration.inHours);
-        // final minutes = twoDigits(duration.inMinutes.remainder(60));
-        // final seconds = twoDigits(duration.inSeconds.remainder(60));
         return SafeArea(
           top: false,
 
@@ -432,7 +427,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                 image: AppImages.checkIn,
                                 title: 'Clock In',
                                 subTitle: formatTime(
-                                  attendanceProvider.shiftStart ?? "09:00",
+                                  attendanceProvider.shiftStart ?? "-",
                                 ),
                                 backgroundColor: ColorResource.white,
                                 subtitleColor: ColorResource.grayText,

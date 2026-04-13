@@ -15,7 +15,6 @@ class DocumentDownload{
         return;
       }
 
-      // Request storage permission (mainly for Android)
       if (Platform.isAndroid) {
         final status = await Permission.storage.request();
         if (!status.isGranted) {
@@ -28,17 +27,14 @@ class DocumentDownload{
 
       final dio = Dio();
 
-      // Get file name from URL
       String fileName = fileUrl.split('/').last;
       if (fileName.isEmpty) {
         fileName = "downloaded_file";
       }
 
-      // Save path
       Directory dir = await getApplicationDocumentsDirectory();
       String savePath = "${dir.path}/$fileName";
 
-      // Download file
       await dio.download(
         fileUrl,
         savePath,
@@ -53,7 +49,7 @@ class DocumentDownload{
         SnackBar(content: Text("Downloaded successfully: $fileName")),
       );
 
-      // Open file after download
+
       await OpenFilex.open(savePath);
 
     } catch (e) {

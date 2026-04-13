@@ -5,6 +5,7 @@ import 'package:nexwage/widget/commonAppBar.dart';
 import 'package:nexwage/widget/commonAppButton.dart';
 import 'package:nexwage/widget/customImageView.dart';
 import 'package:nexwage/widget/custom_text.dart';
+
 class ApplicationSendScreen extends StatefulWidget {
   const ApplicationSendScreen({super.key});
 
@@ -97,7 +98,6 @@ class _ApplicationSendScreenState extends State<ApplicationSendScreen> {
                     textColor: ColorResource.gray,
                     borderColor: const Color(0xFFF1F5F9),
                     onPressed: (){},
-
                   ),
 
                 ],

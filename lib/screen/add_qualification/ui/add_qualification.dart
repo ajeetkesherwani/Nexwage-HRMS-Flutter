@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nexwage/screen/profile/provider/profile_provider.dart';
 import 'package:nexwage/util/color/app_colors.dart';
 import 'package:nexwage/widget/commonAppBar.dart';
@@ -27,7 +28,6 @@ class _AddQualificationState extends State<AddQualification> {
     super.initState();
     Future.microtask(() {
       Provider.of<ProfileProvider>(context, listen: false).documnetMasterApiData();
-
     });
   }
 
@@ -38,7 +38,6 @@ class _AddQualificationState extends State<AddQualification> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-
     if (pickedDate != null) {
       setState(() {
         controller.text = DateFormat('dd-MM-yyyy').format(pickedDate);
@@ -49,9 +48,7 @@ class _AddQualificationState extends State<AddQualification> {
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
 
-  /// 5MB
   final int maxFileSize = 5 * 1024 * 1024;
-
   Future<void> _showImagePickerOptions() async {
     showModalBottomSheet(
       context: context,
@@ -94,16 +91,13 @@ class _AddQualificationState extends State<AddQualification> {
       source: source,
       imageQuality: 85,
     );
-
     if (picked != null) {
       final file = File(picked.path);
       final size = await file.length();
-
       if (size > maxFileSize) {
         _showMessage("Image size should be less than 5MB");
         return;
       }
-
       setState(() {
         selectedImage = file;
       });
@@ -138,12 +132,7 @@ class _AddQualificationState extends State<AddQualification> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomText(
-                          'DEGREE NAME',
-                          size: 14,
-                          weight: FontWeight.w600,
-                          color: ColorResource.black,
-                        ),
+                        label(title: 'DEGREE NAME'),
                         CommonTextFormField(
                           prefixIcon: Icons.school_outlined,
                           controller: qualificationTypeController,
@@ -153,7 +142,6 @@ class _AddQualificationState extends State<AddQualification> {
                           onTap: () {
                             final documentTypes = provider.documentMasterModel?.data?.qualificationEducationLevel ?? [];
                             if (documentTypes.isEmpty) return;
-
                             showModalBottomSheet(
                               context: context,
                               builder: (context) => ListView.builder(
@@ -176,18 +164,12 @@ class _AddQualificationState extends State<AddQualification> {
                           },
                         ),
                         SizedBox(height: 10,),
-                        CustomText(
-                          'INSTITUTION',
-                          size: 14,
-                          weight: FontWeight.w600,
-                          color: ColorResource.black,
-                        ),
+                        label(title: 'INSTITUTION'),
                         CommonTextFormField(
                           controller: univeristyController,
                           hintText: 'e.g. Stanford University',
                           prefixIcon: Icons.account_balance,
                         ),
-                        SizedBox(height: 10,),
 
                         SizedBox(height: 10,),
                         Row(
@@ -196,20 +178,12 @@ class _AddQualificationState extends State<AddQualification> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Start Date',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                    ),
-                                  ),
+                                  label(title: 'Start Date'),
                                   SizedBox(height: 5),
                                   CommonTextFormField(
                                     hintText: 'Select Start Date',
                                     prefixIcon: Icons.calendar_today,
                                     controller: _startDateController,
-                                    // suffixIcon: Icon(Icons.keyboard_arrow_down_sharp, color: Colors.grey),
                                     onTap: () => _selectDate(context, _startDateController,
                                     ),
                                   )
@@ -221,21 +195,12 @@ class _AddQualificationState extends State<AddQualification> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'End Date',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                    ),
-                                  ),
+                                  label(title: 'Start Date'),
                                   SizedBox(height: 5),
-
                                   CommonTextFormField(
                                     prefixIcon: Icons.calendar_today,
                                     hintText: 'Select End Date',
                                     controller: _endDateController,
-                                    //  suffixIcon: Icon(Icons.keyboard_arrow_down_sharp, color: Colors.grey),
                                     onTap: () => _selectDate(context, _endDateController,
                                     ),
                                   )
@@ -245,12 +210,7 @@ class _AddQualificationState extends State<AddQualification> {
                           ],
                         ),
                         SizedBox(height: 10,),
-                        CustomText(
-                          'CERTIFICATE ATTACHMENT',
-                          size: 14,
-                          weight: FontWeight.w600,
-                          color: ColorResource.black,
-                        ),
+                        label(title: 'CERTIFICATE ATTACHMENT'),
                         SizedBox(height: 10,),
                         GestureDetector(
                           onTap: _showImagePickerOptions,
@@ -331,19 +291,78 @@ class _AddQualificationState extends State<AddQualification> {
                         ),
                         SizedBox(height: 50,),
                         CommonAppButton(
-                            backgroundColor1: ColorResource.button1,
-                            backgroundColor2: ColorResource.button1,
-                            text: 'Save Qualification',
-                            isLoading: provider.isLoading,
-                            onPressed: (){
-                              provider.qualificationPostData(
-                                institution_name: univeristyController.text.trim(),
-                                education_level_id: selectedDocumentId.toString(),
-                                from_date: _startDateController.text.trim(),
-                                to_date: _endDateController.text.trim(),
-                                attachment: selectedImage,
+                          backgroundColor1: ColorResource.button1,
+                          backgroundColor2: ColorResource.button1,
+                          text: 'Save Qualification',
+                          isLoading: provider.isLoading,
+                          onPressed: () async {
+                            if (qualificationTypeController.text.trim().isEmpty) {
+                              Fluttertoast.showToast(
+                                msg: "Please enter Qualification Type",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                              return;
+                            }
+
+                            if (univeristyController.text.trim().isEmpty) {
+                              Fluttertoast.showToast(
+                                msg: "Please enter Institution Name",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                              return;
+                            }
+
+                            if (_startDateController.text.trim().isEmpty) {
+                              Fluttertoast.showToast(
+                                msg: "Please enter Start Date",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                              return;
+                            }
+
+                            if (_endDateController.text.trim().isEmpty) {
+                              Fluttertoast.showToast(
+                                msg: "Please enter End Date",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                              return;
+                            }
+
+                            if (selectedImage == null) {
+                              Fluttertoast.showToast(
+                                msg: "Please upload certificate",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                              return;
+                            }
+
+                            final success = await provider.qualificationPostData(
+                              institution_name: univeristyController.text.trim(),
+                              education_level_id: selectedDocumentId.toString(),
+                              from_date: _startDateController.text.trim(),
+                              to_date: _endDateController.text.trim(),
+                              attachment: selectedImage!,
+                            );
+
+                            if (success) {
+                              Fluttertoast.showToast(
+                                msg: "Qualification added successfully",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                            } else {
+                              Fluttertoast.showToast(
+                                msg: "Failed to add qualification",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
                               );
                             }
+                          },
                         ),
                         SizedBox(height: 10,),
 
@@ -354,6 +373,14 @@ class _AddQualificationState extends State<AddQualification> {
               )
           );
         }
+    );
+  }
+  Widget label({required String title}){
+    return CustomText(
+      title,
+      size: 14,
+      weight: FontWeight.w600,
+      color: ColorResource.black,
     );
   }
 }

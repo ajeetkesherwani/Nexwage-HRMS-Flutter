@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import '../../../WebServices/app_url.dart';
 import '../../../WebServices/network/network_api_services.dart';
 import '../../profile_view_all/model/delete_emergencymodel.dart';
+import '../../profile_view_all/model/delete_experience_model.dart';
+import '../../profile_view_all/model/delete_qualification_model.dart';
 import '../model/bankAccountPostModel.dart';
 import '../model/chnagePasswordDataModel.dart';
 import '../model/document_delete_model.dart';
@@ -575,6 +577,40 @@ class ProfileRepository {
       }
 
       return DeleteEmergencyContactModel.fromJson(response);
+    } catch (e) {
+      print('Error deleting document: $e');
+      rethrow;
+    }
+  }
+
+  //Delete Qualification
+
+  Future<DeleteQualificationModel> deleteQualification({required String id}) async {
+    try {
+      final response = await _apiService.deleteApiWithToken("${AppUrl.qualifications}/$id");
+
+      if (response == null || response.isEmpty) {
+        return DeleteQualificationModel(status: true, message: 'Document deleted successfully');
+      }
+
+      return DeleteQualificationModel.fromJson(response);
+    } catch (e) {
+      print('Error deleting document: $e');
+      rethrow;
+    }
+  }
+
+
+  //Delete Experience
+  Future<DeleteExperienceModel> deleteExperience({required String id}) async {
+    try {
+      final response = await _apiService.deleteApiWithToken("${AppUrl.experiences}/$id");
+
+      if (response == null || response.isEmpty) {
+        return DeleteExperienceModel(status: true, message: 'Document deleted successfully');
+      }
+
+      return DeleteExperienceModel.fromJson(response);
     } catch (e) {
       print('Error deleting document: $e');
       rethrow;

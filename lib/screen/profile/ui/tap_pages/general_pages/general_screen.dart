@@ -14,7 +14,10 @@ import '../../../../add_qualification/ui/add_qualification.dart';
 import '../../../../change_password/ui/change_password.dart';
 import '../../../../document/ui/document_downloadscreen.dart';
 import '../../../../document/ui/document_screen.dart';
+import '../../../../profile_view_all/ui/document_view_all.dart';
 import '../../../../profile_view_all/ui/emergency_view_all.dart';
+import '../../../../profile_view_all/ui/qualification_view_all.dart';
+import '../../../../profile_view_all/ui/work_experience_view_all.dart';
 import '../../../../update_bank_details/ui/update_bank_details.dart';
 import '../../../../work_experience/ui/work_experience.dart';
 import '../../../model/emergency_get_all_data_model.dart';
@@ -415,7 +418,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           //itemCount: documentList.length ,
-                          itemCount:2 ,
+                          itemCount: documentList.length > 2 ? 2 : documentList.length,
                           itemBuilder: (context, index) {
                             final docData = documentList[index];
                             return Container(
@@ -462,6 +465,22 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         );
                       },
                     ),
+                    SizedBox(height: 10,),
+                    Row(mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: (){
+                            navPush(context: context, action: DocumentViewAllScreen());
+                          },
+                          child: CustomText(
+                            'View All',
+                            size: 14,
+                            weight: FontWeight.w700,
+                            color: ColorResource.button1,
+                          ),
+                        )
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -524,7 +543,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                        // itemCount: educationList.length,
-                        itemCount: 2,
+                        itemCount: educationList.length > 2 ? 2 : educationList.length,
                         itemBuilder: (context, index) {
                           final item = educationList[index];
 
@@ -553,6 +572,23 @@ class _GeneralScreenState extends State<GeneralScreen> {
                       );
                     }
                   ),
+                  SizedBox(height: 10,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+                          navPush(context: context, action: QualificationViewAllScreen());
+                        },
+                        child: CustomText(
+                          'View All',
+                          size: 14,
+                          weight: FontWeight.w700,
+                          color: ColorResource.button1,
+                        ),
+                      )
+                    ],
+                  )
 
                 ],
               ),
@@ -645,6 +681,23 @@ class _GeneralScreenState extends State<GeneralScreen> {
                         );
                       }
                   ),
+                  SizedBox(height: 10,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+                          navPush(context: context, action: WorkExperienceViewAllScreen());
+                        },
+                        child: CustomText(
+                          'View All',
+                          size: 14,
+                          weight: FontWeight.w700,
+                          color: ColorResource.button1,
+                        ),
+                      )
+                    ],
+                  )
                 ],
               ),
               ),

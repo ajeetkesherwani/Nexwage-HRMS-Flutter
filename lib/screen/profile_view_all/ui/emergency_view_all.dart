@@ -145,9 +145,7 @@ class _EmergencyViewAllScreenState extends State<EmergencyViewAllScreen> {
                           height: 45,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFF5A5F), Color(0xFFFF2D55)],
-                            ),
+                            color: ColorResource.red,
                             borderRadius: BorderRadius.circular(14),
 
                           ),

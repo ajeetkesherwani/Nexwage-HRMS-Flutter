@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../profile_view_all/model/delete_emergencymodel.dart';
+import '../../profile_view_all/model/delete_experience_model.dart';
+import '../../profile_view_all/model/delete_qualification_model.dart';
 import '../model/bankAccountPostModel.dart';
 import '../model/chnagePasswordDataModel.dart';
 import '../model/document_delete_model.dart';
@@ -386,7 +388,39 @@ class ProfileProvider with ChangeNotifier {
 
   //Qualification Post Data
 
-   Future<void> qualificationPostData({
+   // Future<void> qualificationPostData({
+   //   required String institution_name,
+   //   required String education_level_id,
+   //   required String from_date,
+   //   required String to_date,
+   //   File? attachment,
+   // }) async {
+   //   try {
+   //     isLoading = true;
+   //     notifyListeners();
+   //
+   //     final response = await _repo.qualificationPost(
+   //       institution_name: institution_name,
+   //       education_level_id: education_level_id,
+   //       from_date: from_date,
+   //       to_date: to_date,
+   //       attachment: attachment,
+   //     );
+   //
+   //     if (response.status == true) {
+   //       print(" Applied Successfully");
+   //     } else {
+   //
+   //     }
+   //   } catch (e) {
+   //
+   //   } finally {
+   //     isLoading = false;
+   //     notifyListeners();
+   //   }
+   // }
+
+   Future<bool> qualificationPostData({
      required String institution_name,
      required String education_level_id,
      required String from_date,
@@ -406,18 +440,19 @@ class ProfileProvider with ChangeNotifier {
        );
 
        if (response.status == true) {
-         print(" Applied Successfully");
+         print("Applied Successfully");
+         return true;
        } else {
-
+         return false;
        }
      } catch (e) {
-
+       print("Qualification Post Error: $e");
+       return false;
      } finally {
        isLoading = false;
        notifyListeners();
      }
    }
-
    //Get All Qualification Data
 
    QualificationGetDataModel? qualificationGetDataModel;
@@ -770,5 +805,77 @@ class ProfileProvider with ChangeNotifier {
     }
   }
 
+// Delete Qualification
+  DeleteQualificationModel? deleteQualificationModel;
+
+
+  Future<void> deleteQualification({required String id, bool isRefresh = false}) async {
+    loading = true;
+    notifyListeners();
+
+    try {
+      final response = await _repo.deleteQualification(id: id);
+
+      if (response != null) {
+        deleteQualificationModel = response;
+      } else {
+        // fallback for APIs returning no content
+        documentDeleteModel = DocumentDeleteModel(
+          status: true,
+          message: 'Document deleted successfully',
+        );
+      }
+
+      if (isRefresh) {
+        await refreshDocumentList();
+      }
+    } catch (e) {
+      print("Delete Emergency API ERROR: $e");
+      deleteQualificationModel = DeleteQualificationModel(
+        status: false,
+        message: e.toString(),
+      );
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+
+// Delete Experience
+  DeleteExperienceModel? deleteExperienceModel;
+
+
+  Future<void> deleteExperience({required String id, bool isRefresh = false}) async {
+    loading = true;
+    notifyListeners();
+
+    try {
+      final response = await _repo.deleteExperience(id: id);
+
+      if (response != null) {
+        deleteExperienceModel = response;
+      } else {
+        // fallback for APIs returning no content
+        documentDeleteModel = DocumentDeleteModel(
+          status: true,
+          message: 'Document deleted successfully',
+        );
+      }
+
+      if (isRefresh) {
+        await refreshDocumentList();
+      }
+    } catch (e) {
+      print("Delete Emergency API ERROR: $e");
+      deleteExperienceModel = DeleteExperienceModel(
+        status: false,
+        message: e.toString(),
+      );
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
 
 }

@@ -33,10 +33,8 @@ class _LeaveScreenState extends State<LeaveScreen> {
     setState(() {
       isRefreshing = true;
     });
-
     await Provider.of<LeaveProvider>(context, listen: false).getLeaveData(isRefresh: true);
     await Provider.of<LeaveProvider>(context, listen: false).getwithdrawnData(id:"",isRefresh: true);
-
     setState(() {
       isRefreshing = false;
     });
@@ -73,17 +71,18 @@ class _LeaveScreenState extends State<LeaveScreen> {
                               height: 152,
                               child: (leaveList == null || leaveList.isEmpty)
                                   ? Center(
-                                child: Text(
-                                  "No leave data available",
-                                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                                ),
+                                child: CustomText(
+                                  'No leave data available',
+                                  size: 14,
+                                  weight: FontWeight.w400,
+                                  color: ColorResource.gray,
+                                )
                               )
                                   : ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: leaveList.length,
                                 itemBuilder: (context, index) {
                                   final data = leaveList[index];
-
                                   final List<Color> leaveColors = [
                                     Colors.blue,
                                     Colors.green,
@@ -91,7 +90,6 @@ class _LeaveScreenState extends State<LeaveScreen> {
                                     Colors.purple,
                                     Colors.red,
                                   ];
-
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 10),
                                     child: leaveCard(
@@ -114,7 +112,6 @@ class _LeaveScreenState extends State<LeaveScreen> {
                                 text:'Apply Leave',
                                 backgroundColor1: ColorResource.button1,
                                 backgroundColor2: ColorResource.button1,
-                              //  isLoading: leaveProvider.loading,
                                 onPressed: (){
                                   navPush(context: context, action: ApplyForLeaveScreen());
                                 },image: AppImages.plus,),
@@ -129,16 +126,15 @@ class _LeaveScreenState extends State<LeaveScreen> {
                                   weight: FontWeight.w700,
                                   color: ColorResource.black,
                                 ),
-                                CustomText(
-                                  'View All',
-                                  size: 12,
-                                  weight: FontWeight.w600,
-                                  color: ColorResource.button1,
-                                )
+                                // CustomText(
+                                //   'View All',
+                                //   size: 12,
+                                //   weight: FontWeight.w600,
+                                //   color: ColorResource.button1,
+                                // )
                               ],
                             ),
                             SizedBox(height: 10,),
-
 
                         Expanded(
                           child: (leaveRequestList == null || leaveRequestList.isEmpty)
@@ -238,7 +234,6 @@ class _LeaveScreenState extends State<LeaveScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

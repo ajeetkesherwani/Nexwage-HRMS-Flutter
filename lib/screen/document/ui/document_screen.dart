@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexwage/util/color/app_colors.dart';
@@ -18,7 +17,7 @@ String formatDate(String isoDate) {
   if (isoDate.isEmpty) return "";
   try {
     final dateTime = DateTime.parse(isoDate);
-    final formatter = DateFormat('dd MMM, yyyy'); // 15 Oct, 2023
+    final formatter = DateFormat('dd MMM, yyyy');
     return formatter.format(dateTime);
   } catch (e) {
     return isoDate;
@@ -57,10 +56,9 @@ TextEditingController expiryDateController =TextEditingController();
     }
   }
 
-  // Pick image from gallery or camera
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
-    XFile? image = await picker.pickImage(source: ImageSource.gallery); // or camera
+    XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         selectedFile = File(image.path);
@@ -187,7 +185,6 @@ int? selectedDocumentId;
                                 backgroundColor2: ColorResource.button1,
                                 onPressed: () {
                                   if (selectedFile != null) {
-                                    // Call your upload API here
                                     print('Uploading: ${selectedFile!.path}');
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -282,18 +279,13 @@ int? selectedDocumentId;
                               }
                             }
                         ),
-                        SizedBox(height: 10,),
-
-
-
-
-                        SizedBox(height: 10,),
+                        SizedBox(height: 20,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomText(
                               'My Documents',
-                              size: 18,
+                              size: 16,
                               weight: FontWeight.w600,
                               color: ColorResource.black,
                             ),
@@ -309,24 +301,21 @@ int? selectedDocumentId;
                   Builder(
                     builder: (context) {
                       final documentList = profileProvider.getDocumentDataModel?.data ?? [];
-
                       if (documentList.isEmpty) {
                         return Center(
-                          child: Text(
-                            "No documents available",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                            ),
-                          ),
+                          child: CustomText(
+                            'No documents available',
+                            size: 14,
+                            weight: FontWeight.w400,
+                            color: ColorResource.gray,
+                          )
                         );
                       }
                       String formatDate(String? isoDate) {
                         if (isoDate == null || isoDate.isEmpty) return "";
                         try {
                           final dateTime = DateTime.parse(isoDate);
-                          final formatter = DateFormat('dd MMM, yyyy'); // Example: 15 Oct, 2023
+                          final formatter = DateFormat('dd MMM, yyyy');
                           return formatter.format(dateTime);
                         } catch (e) {
                           return isoDate;
@@ -338,7 +327,6 @@ int? selectedDocumentId;
                         itemCount: documentList.length,
                         itemBuilder: (context, index) {
                           final docData = documentList[index];
-
                           return documentCard(
                             date: formatDate(docData.updatedAt),
                             title: docData.documentTitle ?? "",
