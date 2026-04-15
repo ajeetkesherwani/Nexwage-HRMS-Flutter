@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexwage/screen/leave_screen/provider/leave_provider.dart';
@@ -8,13 +7,13 @@ import 'package:nexwage/widget/commonAppBar.dart';
 import 'package:nexwage/widget/commonTextFormField.dart';
 import 'package:nexwage/widget/custom_text.dart';
 import 'package:provider/provider.dart';
-
 import '../../../util/image_resource/image_resource.dart';
 import '../../../widget/commonAppButton.dart';
 import '../../../widget/customImageView.dart';
 import '../../../widget/custom_calender.dart';
 import '../../../widget/navigator_method.dart';
 import 'application_send_screen.dart';
+
 class ApplyForLeaveScreen extends StatefulWidget {
   const ApplyForLeaveScreen({super.key});
 
@@ -34,14 +33,10 @@ class _ApplyForLeaveScreenState extends State<ApplyForLeaveScreen> {
     });
   }
   DateTimeRange? selectedDateRange;
-
   File? _image;
-
   final ImagePicker _picker = ImagePicker();
-
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
-
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
@@ -132,18 +127,11 @@ class _ApplyForLeaveScreenState extends State<ApplyForLeaveScreen> {
                                   itemCount: leaveList.length,
                                   itemBuilder: (context, index) {
                                     final leave = leaveList[index];
-
                                     return ListTile(
-                                      title: Text(leave.leaveType ?? ""),
+                                      title: Text(leave.leaveType ?? "",style: TextStyle(color: ColorResource.black),),
                                       onTap: () {
-                                        // ✅ Store NAME for UI
-                                        leaveProvider.leaveController.text =
-                                            leave.leaveType ?? "";
-
-                                        // ✅ Store ID for API
-                                        leaveProvider.selectedLeaveTypeId =
-                                            leave.id.toString();
-
+                                        leaveProvider.leaveController.text = leave.leaveType ?? "";
+                                        leaveProvider.selectedLeaveTypeId = leave.id.toString();
                                         Navigator.pop(context);
                                       },
                                     );
@@ -179,11 +167,9 @@ class _ApplyForLeaveScreenState extends State<ApplyForLeaveScreen> {
                             if (result != null) {
                               final start = result['startDate'] as DateTime;
                               final end = result['endDate'] as DateTime;
-
                               setState(() {
                                 startDate = start;
                                 endDate = end;
-
                                 leaveProvider.dateController.text =
                                 "${formatDate(start)} - ${formatDate(end)}";
 

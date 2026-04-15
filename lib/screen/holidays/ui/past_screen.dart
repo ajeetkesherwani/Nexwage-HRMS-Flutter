@@ -65,6 +65,7 @@ class _PastScreenState extends State<PastScreen> {
                       final endDayNumber = endDate != null ? DateFormat('d').format(endDate) : "";
                       final endDayName = endDate != null ? DateFormat('EEEE').format(endDate) : "";
                       final endMonthName = endDate != null ? DateFormat('MMM').format(endDate) : "";
+                      bool isSameDate = dayNumber == endDayNumber && monthName == endMonthName;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Row(
@@ -80,49 +81,116 @@ class _PastScreenState extends State<PastScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CustomText(
-                                        dayNumber,
-                                        size: 18,
-                                        weight: FontWeight.w700,
-                                        color: ColorResource.orange,
-                                      ),
-                                      CustomText(
-                                        monthName,
-                                        size: 10,
-                                        weight: FontWeight.w700,
-                                        color: ColorResource.orange,
-                                      ),
-                                    ],
+                                  // Column(
+                                  //   mainAxisAlignment: MainAxisAlignment.center,
+                                  //   children: [
+                                  //     CustomText(
+                                  //       dayNumber,
+                                  //       size: 18,
+                                  //       weight: FontWeight.w700,
+                                  //       color: ColorResource.orange,
+                                  //     ),
+                                  //     CustomText(
+                                  //       monthName,
+                                  //       size: 10,
+                                  //       weight: FontWeight.w700,
+                                  //       color: ColorResource.orange,
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                  // Padding(
+                                  //   padding: const EdgeInsets.symmetric(horizontal: 2),
+                                  //   child: CustomText(
+                                  //     "-",
+                                  //     size: 16,
+                                  //     weight: FontWeight.w700,
+                                  //     color: ColorResource.orange,
+                                  //   ),
+                                  // ),
+                                  // Column(
+                                  //   mainAxisAlignment: MainAxisAlignment.center,
+                                  //   children: [
+                                  //     CustomText(
+                                  //       endDayNumber,
+                                  //       size: 18,
+                                  //       weight: FontWeight.w700,
+                                  //       color: ColorResource.orange,
+                                  //     ),
+                                  //     CustomText(
+                                  //       endMonthName,
+                                  //       size: 10,
+                                  //       weight: FontWeight.w700,
+                                  //       color: ColorResource.orange,
+                                  //     ),
+                                  //   ],
+                                  // ),
+
+                              isSameDate
+                              ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomText(
+                                    dayNumber,
+                                    size: 18,
+                                    weight: FontWeight.w700,
+                                    color: ColorResource.orange,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                                    child: CustomText(
-                                      "-",
-                                      size: 16,
-                                      weight: FontWeight.w700,
-                                      color: ColorResource.orange,
-                                    ),
+                                  CustomText(
+                                    monthName,
+                                    size: 10,
+                                    weight: FontWeight.w700,
+                                    color: ColorResource.orange,
                                   ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CustomText(
-                                        endDayNumber,
-                                        size: 18,
-                                        weight: FontWeight.w700,
-                                        color: ColorResource.orange,
-                                      ),
-                                      CustomText(
-                                        endMonthName,
-                                        size: 10,
-                                        weight: FontWeight.w700,
-                                        color: ColorResource.orange,
-                                      ),
-                                    ],
-                                  ),
+                                ],
+                              )
+                              : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CustomText(
+                                  dayNumber,
+                                  size: 18,
+                                  weight: FontWeight.w700,
+                                  color: ColorResource.orange,
+                                ),
+                                CustomText(
+                                  monthName,
+                                  size: 10,
+                                  weight: FontWeight.w700,
+                                  color: ColorResource.orange,
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              child: CustomText(
+                                "-",
+                                size: 16,
+                                weight: FontWeight.w700,
+                                color: ColorResource.orange,
+                              ),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CustomText(
+                                  endDayNumber,
+                                  size: 18,
+                                  weight: FontWeight.w700,
+                                  color: ColorResource.orange,
+                                ),
+                                CustomText(
+                                  endMonthName,
+                                  size: 10,
+                                  weight: FontWeight.w700,
+                                  color: ColorResource.orange,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                                 ],
                               ),
                             ),

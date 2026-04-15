@@ -126,12 +126,6 @@ class _LeaveScreenState extends State<LeaveScreen> {
                                   weight: FontWeight.w700,
                                   color: ColorResource.black,
                                 ),
-                                // CustomText(
-                                //   'View All',
-                                //   size: 12,
-                                //   weight: FontWeight.w600,
-                                //   color: ColorResource.button1,
-                                // )
                               ],
                             ),
                             SizedBox(height: 10,),
@@ -261,7 +255,6 @@ class _LeaveScreenState extends State<LeaveScreen> {
 
           SizedBox(height: 10),
           CustomText(
-
             '${requestLeave.fromDate ?? ""} ${requestLeave.toDate ?? ""}',
             size: 16,
             weight: FontWeight.w700,
